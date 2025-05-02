@@ -45,7 +45,12 @@ export const SearchFiles = () => {
 						value={code}
 						onChange={(e) => setCode(e.target.value)}
 						placeholder="Enter file code (e.g., d3g45h)"
-						className="w-full px-4 py-3 pl-12 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+						className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+						style={{
+							backgroundColor: "var(--background-primary)",
+							color: "var(--text-primary)",
+							borderColor: "var(--border-primary)",
+						}}
 					/>
 					<Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
 				</div>
@@ -55,9 +60,13 @@ export const SearchFiles = () => {
 					whileTap={{ scale: 0.98 }}
 					type="submit"
 					disabled={searching}
-					className="w-full py-3 px-4 bg-primary text-white rounded-lg font-medium
+					className="w-full py-3 px-4 rounded-lg font-medium
             hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50
             disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+					style={{
+						backgroundColor: "var(--button-primary)",
+						color: "var(--text-primary)",
+					}}
 				>
 					{searching ? "Searching..." : "Search File"}
 				</motion.button>

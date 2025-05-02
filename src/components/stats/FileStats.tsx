@@ -13,14 +13,24 @@ const StatCard = ({ title, value, icon, delay = 0 }: StatCardProps) => (
 		initial={{ opacity: 0, y: 20 }}
 		animate={{ opacity: 1, y: 0 }}
 		transition={{ delay }}
-		className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
+		className="p-6 rounded-xl shadow-sm border border-gray-100"
+		style={{
+			backgroundColor: "var(--background-card)",
+			borderColor: "var(--border-primary)",
+		}}
 	>
 		<div className="flex items-center justify-between">
 			<div>
-				<p className="text-sm font-medium text-gray-600">{title}</p>
-				<p className="text-2xl font-semibold text-gray-900 mt-1">{value}</p>
+				<p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}	>
+					{title}
+				</p>
+				<p className="text-2xl font-semibold text-gray-900 mt-1" style={{ color: "var(--text-primary)" }}>
+					{value}
+				</p>
 			</div>
-			<div className="p-3 bg-primary/10 rounded-lg">{icon}</div>
+			<div className="p-3 rounded-lg" style={{ color: "var(--text-primary)" }}>
+				{icon}
+			</div>
 		</div>
 	</motion.div>
 );
@@ -62,22 +72,31 @@ export const FileStats = () => {
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ delay: 0.4 }}
-				className="mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+				className="mt-8 rounded-xl shadow-sm border border-gray-100 p-6"
+				style={{
+					backgroundColor: "var(--background-card)",
+					borderColor: "var(--border-primary)",
+				}}
 			>
-				<h3 className="text-lg font-semibold text-gray-900 mb-6">
+				<h3 className="text-lg font-semibold mb-6" style={{ color: "var(--text-primary)" }}>
 					Recent Activity
 				</h3>
 				<div className="space-y-4">
 					{[...Array(5)].map((_, i) => (
 						<div
 							key={i}
-							className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0"
+							className="flex items-center justify-between py-3 border-b last:border-0"
+							style={{
+								borderColor: "var(--border-primary)",
+							}}
 						>
 							<div>
-								<p className="text-sm font-medium text-gray-900">
+								<p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
 									File_{i + 1}.pdf
 								</p>
-								<p className="text-xs text-gray-500">Viewed 2 minutes ago</p>
+								<p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+									Viewed 2 minutes ago
+								</p>
 							</div>
 							<span className="text-xs font-medium text-primary">
 								{Math.floor(Math.random() * 100)} views

@@ -61,7 +61,7 @@ export const UploadZone = () => {
 		<div className="w-full max-w-3xl mx-auto p-6">
 			<div
 				{...getRootProps()}
-				className={`border-2 border-dashed rounded-xl p-8 py-20 text-center cursor-pointer transition-colors backdrop-blur-lg bg-opacity-10`}
+				className={`border-2 border-dashed rounded-xl p-8 py-16 md:py-20 text-center cursor-pointer transition-colors backdrop-blur-lg bg-opacity-10`}
 				style={{
 					backgroundColor: "var(--background-card)",
 					borderColor: "var(--border-secondary)",
@@ -168,7 +168,7 @@ export const UploadZone = () => {
 							className="w-full py-3 px-4 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
 							style={{
 								backgroundColor: "var(--button-primary)",
-								color: "var(--text-primary)",
+								color: "var(--text-inverted)",
 							}}
 						>
 							{uploading ? "Uploading..." : "Upload Files"}

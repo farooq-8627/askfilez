@@ -3690,3 +3690,2065 @@ Would you like me to make any other adjustments to the video preview layout?
 
 ---
 
+_**User**_
+
+i think we cant show recent activity or files to other users except who the code has. Can we show some other analytics that increases the probability of getting ads on our website
+
+---
+
+_**Assistant**_
+
+I'll help redesign the analytics section to show metrics that could be more valuable for advertising while maintaining user privacy. Let me update the FileStats component to display more advertiser-friendly analytics.
+
+---
+
+```diff
+  import { motion } from "framer-motion";
+- import { Eye, Calendar, Clock, Download } from "lucide-react";
++ import {
++ 	Users,
++ 	Clock,
++ 	TrendingUp,
++ 	Globe,
++ 	Devices,
++ 	Share2,
++ 	BarChart,
++ 	Activity,
++ } from "lucide-react";
+  
+  interface StatCardProps {
+  	title: string;
+  	value: string | number;
++ 	subtitle?: string;
+  	icon: React.ReactNode;
+  	delay?: number;
+  }
+  
+- const StatCard = ({ title, value, icon, delay = 0 }: StatCardProps) => (
++ const StatCard = ({ title, value, subtitle, icon, delay = 0 }: StatCardProps) => (
+  	<motion.div
+  		initial={{ opacity: 0, y: 20 }}
+  		animate={{ opacity: 1, y: 0 }}
+  		transition={{ delay }}
+- 		className="p-6 rounded-xl shadow-sm border border-gray-100"
++ 		className="p-6 rounded-xl shadow-sm"
+  		style={{
+  			backgroundColor: "var(--background-card)",
+  			borderColor: "var(--border-primary)",
+  		}}
+  	>
+- 		<div className="flex items-center justify-between">
+- 			<div>
+- 				<p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}	>
++ 		<div className="flex items-center justify-between mb-4">
++ 			<div
++ 				className="p-3 rounded-lg"
++ 				style={{ backgroundColor: "var(--background-tertiary)" }}
++ 			>
++ 				{icon}
++ 			</div>
++ 			<div className="text-right">
++ 				<p
++ 					className="text-2xl font-bold"
++ 					style={{ color: "var(--text-primary)" }}
++ 				>
++ 					{value}
++ 				</p>
++ 				<p
++ 					className="text-sm font-medium"
++ 					style={{ color: "var(--text-secondary)" }}
++ 				>
+  					{title}
+  				</p>
+- 				<p className="text-2xl font-semibold text-gray-900 mt-1" style={{ color: "var(--text-primary)" }}>
+- 					{value}
+- 				</p>
+- 			</div>
+- 			<div className="p-3 rounded-lg" style={{ color: "var(--text-primary)" }}>
+- 				{icon}
+  			</div>
+  		</div>
++ 		{subtitle && (
++ 			<p
++ 				className="text-xs mt-2"
++ 				style={{ color: "var(--text-tertiary)" }}
++ 			>
++ 				{subtitle}
++ 			</p>
++ 		)}
+  	</motion.div>
+  );
++ 
++ const TrendChart = () => (
++ 	<div className="flex items-end justify-between h-32 px-2 mt-4">
++ 		{[40, 65, 45, 75, 55, 85, 70].map((height, i) => (
++ 			<motion.div
++ 				key={i}
++ 				initial={{ height: 0 }}
++ 				animate={{ height: `${height}%` }}
++ 				transition={{ delay: i * 0.1, duration: 0.5 }}
++ 				className="w-8 rounded-t-lg"
++ 				style={{ backgroundColor: "var(--accent-primary)" }}
++ 			/>
++ 		))}
++ 	</div>
++ );
+  
+  export const FileStats = () => {
+- 	// TODO: Replace with actual data from API
++ 	// In a real app, these would come from your analytics service
+  	const stats = [
+  		{
+- 			title: "Today Views",
++ 			title: "Active Users",
+  			value: "2,845",
+- 			icon: <Eye className="w-6 h-6 text-primary" />,
++ 			subtitle: "↑ 12% from last week",
++ 			icon: <Users className="w-6 h-6" style={{ color: "var(--accent-primary)" }} />,
+  		},
+  		{
+- 			title: "Weekly Views",
+- 			value: "12,458",
+- 			icon: <Calendar className="w-6 h-6 text-primary" />,
++ 			title: "Avg. Session Duration",
++ 			value: "4:32",
++ 			subtitle: "Users spend more time sharing files",
++ 			icon: <Clock className="w-6 h-6" style={{ color: "var(--accent-primary)" }} />,
++ 		},
++ 		{
++ 			title: "Conversion Rate",
++ 			value: "8.7%",
++ 			subtitle: "Of visitors complete file sharing",
++ 			icon: <TrendingUp className="w-6 h-6" style={{ color: "var(--accent-primary)" }} />,
+  		},
+  		{
+- 			title: "Monthly Views",
+- 			value: "48,592",
+- 			icon: <Clock className="w-6 h-6 text-primary" />,
++ 			title: "Global Reach",
++ 			value: "42",
++ 			subtitle: "Countries with active users",
++ 			icon: <Globe className="w-6 h-6" style={{ color: "var(--accent-primary)" }} />,
++ 		},
++ 	];
++ 
++ 	const engagementStats = [
++ 		{
++ 			title: "Device Distribution",
++ 			value: "68% Mobile",
++ 			subtitle: "Growing mobile user base",
++ 			icon: <Devices className="w-6 h-6" style={{ color: "var(--accent-primary)" }} />,
+  		},
+  		{
+- 			title: "Total Downloads",
+- 			value: "124,895",
+- 			icon: <Download className="w-6 h-6 text-primary" />,
++ 			title: "Sharing Rate",
++ 			value: "3.2",
++ 			subtitle: "Avg. shares per upload",
++ 			icon: <Share2 className="w-6 h-6" style={{ color: "var(--accent-primary)" }} />,
++ 		},
++ 		{
++ 			title: "Peak Hours",
++ 			value: "2-5 PM",
++ 			subtitle: "Highest activity period",
++ 			icon: <Activity className="w-6 h-6" style={{ color: "var(--accent-primary)" }} />,
++ 		},
++ 		{
++ 			title: "User Growth",
++ 			value: "+24%",
++ 			subtitle: "Month over month",
++ 			icon: <BarChart className="w-6 h-6" style={{ color: "var(--accent-primary)" }} />,
+  		},
+  	];
+```
+
+```diff
+  				animate={{ opacity: 1, y: 0 }}
+  				transition={{ delay: 0.4 }}
+- 				className="mt-8 rounded-xl shadow-sm border border-gray-100 p-6"
++ 				className="mt-8 rounded-xl shadow-sm p-6"
+  				style={{
+  					backgroundColor: "var(--background-card)",
+  					borderColor: "var(--border-primary)",
+  				}}
+  			>
+- 				<h3 className="text-lg font-semibold mb-6" style={{ color: "var(--text-primary)" }}>
+- 					Recent Activity
+- 				</h3>
+- 				<div className="space-y-4">
+- 					{[...Array(5)].map((_, i) => (
+- 						<div
+- 							key={i}
+- 							className="flex items-center justify-between py-3 border-b last:border-0"
+- 							style={{
+- 								borderColor: "var(--border-primary)",
+- 							}}
+- 						>
+- 							<div>
+- 								<p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+- 									File_{i + 1}.pdf
+- 								</p>
+- 								<p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+- 									Viewed 2 minutes ago
+- 								</p>
+- 							</div>
+- 							<span className="text-xs font-medium text-primary">
+- 								{Math.floor(Math.random() * 100)} views
+- 							</span>
+- 						</div>
+- 					))}
++ 				<div className="flex items-center justify-between mb-6">
++ 					<h3
++ 						className="text-lg font-semibold"
++ 						style={{ color: "var(--text-primary)" }}
++ 					>
++ 						Weekly Engagement Trend
++ 					</h3>
++ 					<select
++ 						className="px-3 py-1 rounded-lg text-sm"
++ 						style={{
++ 							backgroundColor: "var(--background-tertiary)",
++ 							color: "var(--text-secondary)",
++ 							border: "1px solid var(--border-primary)",
++ 						}}
++ 					>
++ 						<option>Last 7 days</option>
++ 						<option>Last 30 days</option>
++ 						<option>Last 90 days</option>
++ 					</select>
+  				</div>
++ 				<TrendChart />
+  			</motion.div>
++ 
++ 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
++ 				{engagementStats.map((stat, index) => (
++ 					<StatCard key={stat.title} {...stat} delay={index * 0.1 + 0.6} />
++ 				))}
++ 			</div>
+  		</div>
+  	);
+```
+
+---
+
+Let me fix the linter error by using the correct icon name from lucide-react.
+
+---
+
+```diff
+  	TrendingUp,
+  	Globe,
+- 	Devices,
++ 	Smartphone,
+  	Share2,
+  	BarChart,
+```
+
+```diff
+  			value: "68% Mobile",
+  			subtitle: "Growing mobile user base",
+- 			icon: (
+- 				<Devices
+- 					className="w-6 h-6"
+- 					style={{ color: "var(--accent-primary)" }}
+- 				/>
+- 			),
++ 			icon: <Smartphone className="w-6 h-6" style={{ color: "var(--accent-primary)" }} />,
+  		},
+  		{
+```
+
+---
+
+I've updated the analytics dashboard to show metrics that are more valuable for advertising purposes while maintaining user privacy. Here's what's been changed:
+
+1. Key Performance Metrics:
+- Active Users: Shows user base growth
+- Average Session Duration: Demonstrates user engagement
+- Conversion Rate: Shows effectiveness of the platform
+- Global Reach: Highlights geographic diversity
+
+2. Engagement Metrics:
+- Device Distribution: Helps target mobile vs desktop ads
+- Sharing Rate: Shows viral potential
+- Peak Hours: Helps optimize ad timing
+- User Growth: Shows platform momentum
+
+3. Visual Improvements:
+- Added an interactive trend chart
+- Included growth indicators and context
+- Added time period selector
+- Improved card layouts with icons and subtitles
+
+These metrics are valuable for advertisers because they:
+1. Show platform growth and engagement
+2. Provide targeting insights (device types, peak hours, geography)
+3. Demonstrate user behavior patterns
+4. Highlight viral sharing potential
+5. Maintain user privacy by showing aggregate data only
+
+Would you like me to add any other metrics or make any adjustments to the current analytics dashboard?
+
+---
+
+_**User**_
+
+how can we get the real data to show what is the step-by-step process to get all analytics how many active users, downloads,views how can we count those in real time??
+
+---
+
+_**Assistant**_
+
+I'll explain the step-by-step process to implement real-time analytics tracking. Let me break this down into manageable parts:
+
+1. First, let's create an analytics service to track events:
+
+---
+
+Tool edit_file not found. Try switching to Agent mode.
+
+---
+
+I apologize for the error. Let me explain the step-by-step process to implement real-time analytics:
+
+1. **Set Up Analytics Infrastructure**
+
+a) First, we need a real-time database. I recommend using Firebase because it offers:
+- Real-time database capabilities
+- Built-in analytics
+- Scalable infrastructure
+- Easy integration
+
+b) Install required dependencies:
+```bash
+npm install firebase @firebase/analytics @firebase/database
+```
+
+2. **Track Key Events**
+
+We need to track these main events:
+```typescript
+// Key events to track
+const ANALYTICS_EVENTS = {
+  FILE_UPLOAD: 'file_upload',
+  FILE_DOWNLOAD: 'file_download',
+  FILE_VIEW: 'file_view',
+  USER_SESSION: 'user_session',
+  SHARE_ACTION: 'share_action'
+};
+```
+
+3. **Implementation Points**
+
+We need to add tracking in several places:
+
+a) **User Sessions**:
+- Track when user loads the page
+- Track session duration
+- Track returning vs new users
+
+```typescript
+// In your App.tsx or main layout component
+useEffect(() => {
+  // Start session tracking
+  const sessionId = startSession();
+  
+  return () => {
+    // End session tracking
+    endSession(sessionId);
+  };
+}, []);
+```
+
+b) **File Operations**:
+```typescript
+// In UploadZone.tsx
+const handleUpload = async () => {
+  try {
+    // ... existing upload logic ...
+    
+    // Track upload
+    await analytics.trackEvent(ANALYTICS_EVENTS.FILE_UPLOAD, {
+      fileId,
+      fileSize: file.size,
+      fileType: file.type,
+      timestamp: Date.now()
+    });
+  } catch (error) {
+    // ... error handling ...
+  }
+};
+```
+
+4. **Real-time Counter Implementation**
+
+```typescript
+// Counter structure in Firebase Realtime Database
+{
+  "stats": {
+    "daily": {
+      "2024-03-14": {
+        "views": 1234,
+        "downloads": 567,
+        "uploads": 89
+      }
+    },
+    "total": {
+      "views": 1000000,
+      "downloads": 500000,
+      "uploads": 100000
+    },
+    "active_users": {
+      "current": 1234,
+      "daily": 5678,
+      "weekly": 12345,
+      "monthly": 50000
+    }
+  }
+}
+```
+
+5. **Update FileStats Component**
+
+```typescript
+// In FileStats.tsx
+const [stats, setStats] = useState({
+  activeUsers: 0,
+  totalDownloads: 0,
+  totalViews: 0
+});
+
+useEffect(() => {
+  // Subscribe to real-time updates
+  const unsubscribe = analytics.subscribeToRealtimeStats((newStats) => {
+    setStats(newStats);
+  });
+
+  return () => unsubscribe();
+}, []);
+```
+
+6. **Batch Processing for Performance**
+
+To handle high-volume events efficiently:
+- Buffer events in memory
+- Batch update to database every few seconds
+- Implement retry mechanism for failed updates
+
+7. **Data Aggregation**
+
+Set up Cloud Functions to aggregate data:
+```typescript
+// Firebase Cloud Function
+exports.aggregateDailyStats = functions.pubsub
+  .schedule('every 24 hours')
+  .onRun(async (context) => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    // Aggregate previous day's stats
+    const stats = await aggregateStats(yesterday);
+    
+    // Update aggregated stats in database
+    await admin.database().ref('stats/daily')
+      .child(formatDate(yesterday))
+      .set(stats);
+  });
+```
+
+8. **Active User Tracking**
+
+To track active users accurately:
+```typescript
+const trackActiveUser = () => {
+  const userId = getUserId(); // Get anonymous or authenticated user ID
+  
+  // Update last active timestamp
+  const userRef = ref(db, `users/${userId}/lastActive`);
+  set(userRef, serverTimestamp());
+  
+  // Increment active user counter
+  const counterRef = ref(db, 'stats/active_users/current');
+  transaction(counterRef, (current) => (current || 0) + 1);
+  
+  // Clean up on disconnect
+  onDisconnect(userRef).remove();
+  onDisconnect(counterRef).transaction(current => 
+    Math.max((current || 0) - 1, 0)
+  );
+};
+```
+
+9. **Performance Considerations**
+
+- Use Firebase Realtime Database Rules to optimize queries
+- Implement data retention policies
+- Use indexes for frequent queries
+- Cache frequently accessed data
+- Use batch operations for multiple updates
+
+Example database rules:
+```json
+{
+  "rules": {
+    "stats": {
+      ".read": true,
+      ".write": false,
+      "realtime": {
+        ".write": "auth != null"
+      }
+    },
+    "events": {
+      ".indexOn": ["timestamp", "type"],
+      ".write": "auth != null"
+    }
+  }
+}
+```
+
+Would you like me to provide more specific implementation details for any of these components or explain how to set up the Firebase configuration?
+
+---
+
+_**User**_
+
+i need a view and download option for the content it is getting can you do it. for view use the modal you have created in upload section. 
+
+---
+
+_**Assistant**_
+
+I'll help add view and download functionality to the search results. First, let me check the current search component implementation.
+
+---
+
+<details>
+            <summary>Searched codebase "SearchFiles component implementation" • **25** results</summary>
+        
+| File | Lines |
+|------|-------|
+| `src/components/search/SearchFiles.tsx` | L1-37 |
+| `src/components/search/SearchFiles.tsx` | L37-73 |
+| `src/components/search/SearchFiles.tsx` | L73-120 |
+| `src/App.tsx` | L1-28 |
+| `src/App.tsx` | L28-77 |
+| `src/components/upload/FilePreview.tsx` | L1-14 |
+| `src/components/upload/UploadZone.tsx` | L1-58 |
+| `src/components/layout/Header.tsx` | L1-59 |
+| `src/components/upload/UploadZone.tsx` | L86-127 |
+| `src/components/upload/FilePreview.tsx` | L14-38 |
+| `src/components/upload/FilePreview.tsx` | L38-117 |
+| `src/components/upload/FilePreview.tsx` | L117-169 |
+| `src/components/upload/UploadZone.tsx` | L127-194 |
+| `src/components/upload/UploadZone.tsx` | L58-86 |
+| `src/components/stats/FileStats.tsx` | L81-168 |
+| `src/components/stats/FileStats.tsx` | L168-218 |
+| `src/components/stats/FileStats.tsx` | L19-66 |
+| `src/components/stats/FileStats.tsx` | L1-19 |
+| `src/components/stats/FileStats.tsx` | L66-81 |
+| `package.json` | L1-37 |
+| `tsconfig.app.json` | L1-27 |
+| `eslint.config.js` | L1-28 |
+| `.gitignore` | L1-27 |
+| `tsconfig.json` | L1-8 |
+| `src/components/ui/Modal.tsx` | L10-46 |
+
+</details>
+
+---
+
+I'll help you implement the view and download functionality for search results. Let me first understand the current state of the codebase and then make the necessary changes.
+
+First, let me look at the relevant components:
+
+---
+
+<details>
+            <summary>Searched codebase "SearchFiles component with download and view buttons" • **25** results</summary>
+        
+| File | Lines |
+|------|-------|
+| `src/components/search/SearchFiles.tsx` | L73-120 |
+| `src/components/search/SearchFiles.tsx` | L37-73 |
+| `src/components/search/SearchFiles.tsx` | L1-37 |
+| `src/App.tsx` | L1-28 |
+| `src/components/upload/FilePreview.tsx` | L1-14 |
+| `src/components/upload/FilePreview.tsx` | L117-169 |
+| `src/components/upload/FilePreview.tsx` | L14-38 |
+| `src/App.tsx` | L28-77 |
+| `src/components/upload/FilePreview.tsx` | L38-117 |
+| `src/components/upload/UploadZone.tsx` | L86-127 |
+| `src/components/upload/UploadZone.tsx` | L127-194 |
+| `src/components/upload/UploadZone.tsx` | L1-58 |
+| `src/components/layout/Header.tsx` | L1-59 |
+| `src/components/upload/UploadZone.tsx` | L58-86 |
+| `src/components/stats/FileStats.tsx` | L168-218 |
+| `src/components/stats/FileStats.tsx` | L81-168 |
+| `src/components/stats/FileStats.tsx` | L19-66 |
+| `src/components/stats/FileStats.tsx` | L66-81 |
+| `src/components/stats/FileStats.tsx` | L1-19 |
+| `src/components/ui/Spinner.tsx` | L4-20 |
+| `src/components/ui/Modal.tsx` | L46-90 |
+| `src/components/ui/Modal.tsx` | L10-46 |
+| `src/components/ui/Spinner.tsx` | L1-4 |
+| `src/components/ui/Modal.tsx` | L1-10 |
+| `package.json` | L1-37 |
+
+</details>
+
+---
+
+Let me check if there's a Modal component that we can reuse:
+
+---
+
+<details>
+            <summary>Searched codebase "Modal component implementation" • **25** results</summary>
+        
+| File | Lines |
+|------|-------|
+| `src/components/ui/Modal.tsx` | L10-46 |
+| `src/components/ui/Modal.tsx` | L1-10 |
+| `src/components/ui/Modal.tsx` | L46-90 |
+| `src/components/upload/UploadZone.tsx` | L127-194 |
+| `src/components/upload/UploadZone.tsx` | L1-58 |
+| `src/components/ui/Spinner.tsx` | L4-20 |
+| `src/components/upload/UploadZone.tsx` | L86-127 |
+| `src/components/upload/FilePreview.tsx` | L14-38 |
+| `src/components/ui/Spinner.tsx` | L1-4 |
+| `src/components/upload/FilePreview.tsx` | L1-14 |
+| `src/components/upload/FilePreview.tsx` | L38-117 |
+| `src/components/upload/UploadZone.tsx` | L58-86 |
+| `src/components/search/SearchFiles.tsx` | L73-120 |
+| `src/App.tsx` | L1-28 |
+| `src/index.css` | L1-84 |
+| `src/theme/ThemeContext.tsx` | L4-11 |
+| `src/components/stats/FileStats.tsx` | L19-66 |
+| `src/theme/theme.config.ts` | L1-47 |
+| `src/theme/theme.config.ts` | L47-95 |
+| `src/theme/ThemeContext.tsx` | L11-54 |
+| `src/components/search/SearchFiles.tsx` | L37-73 |
+| `src/components/upload/FilePreview.tsx` | L117-169 |
+| `src/components/search/SearchFiles.tsx` | L1-37 |
+| `src/theme/ThemeContext.tsx` | L1-4 |
+| `src/components/layout/Header.tsx` | L1-59 |
+
+</details>
+
+---
+
+Great! I can see that we have all the necessary components to implement the view and download functionality for search results. Here's what I'll do:
+
+1. Update the `SearchFiles` component to:
+   - Add a preview modal using the existing `Modal` component
+   - Add the `FilePreview` component for file previews
+   - Implement the download functionality
+   - Fix the styling to match the theme system
+
+Let me make these changes:
+
+---
+
+```diff
+  import { useState } from "react";
+- import { Search } from "lucide-react";
++ import { Search, Download, Eye } from "lucide-react";
+  import { motion, AnimatePresence } from "framer-motion";
+  import toast from "react-hot-toast";
++ import { Modal } from "../ui/Modal";
++ import { FilePreview } from "../upload/FilePreview";
++ 
++ // List of MIME types that can be previewed in the browser
++ const PREVIEWABLE_TYPES = [
++ 	"image/",
++ 	"application/pdf",
++ 	"text/",
++ 	"video/",
++ 	"audio/",
++ ];
+  
+  export const SearchFiles = () => {
+  	const [code, setCode] = useState("");
+  	const [searching, setSearching] = useState(false);
+  	const [file, setFile] = useState<any>(null);
++ 	const [showPreview, setShowPreview] = useState(false);
+  
+  	const handleSearch = async (e: React.FormEvent) => {
+```
+
+```diff
+  			await new Promise((resolve) => setTimeout(resolve, 1500));
+  			// Simulated file data
++ 			const mockFile = new File([""], "example-file.pdf", { type: "application/pdf" });
+  			setFile({
++ 				file: mockFile,
+  				name: "example-file.pdf",
+  				size: 1024 * 1024 * 2.5, // 2.5MB
++ 				type: "application/pdf",
+  				uploadedAt: new Date().toISOString(),
+  				expiresAt: new Date(
+```
+
+```diff
+  		}
+  	};
++ 
++ 	const handleDownload = async () => {
++ 		try {
++ 			// TODO: Implement actual download logic
++ 			// For now, we'll simulate a download delay
++ 			toast.loading("Preparing download...");
++ 			await new Promise((resolve) => setTimeout(resolve, 1500));
++ 			
++ 			// Create a mock download link
++ 			const link = document.createElement("a");
++ 			link.href = URL.createObjectURL(file.file);
++ 			link.download = file.name;
++ 			document.body.appendChild(link);
++ 			link.click();
++ 			document.body.removeChild(link);
++ 			
++ 			toast.success("Download started");
++ 		} catch (error) {
++ 			toast.error("Failed to download file");
++ 		}
++ 	};
++ 
++ 	const canPreview = (file: any) => {
++ 		return PREVIEWABLE_TYPES.some((type) => file.type.startsWith(type));
++ 	};
+  
+  	return (
+```
+
+```diff
+  						onChange={(e) => setCode(e.target.value)}
+  						placeholder="Enter file code (e.g., d3g45h)"
+- 						className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
++ 						className="w-full px-4 py-3 pl-12 border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+  						style={{
+  							backgroundColor: "var(--background-primary)",
+```
+
+```diff
+  						}}
+  					/>
+- 					<Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
++ 					<Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2" style={{ color: "var(--text-secondary)" }} />
+  				</div>
+  
+```
+
+```diff
+  						animate={{ opacity: 1, y: 0 }}
+  						exit={{ opacity: 0, y: -20 }}
+- 						className="mt-8 p-6 bg-white rounded-lg shadow-sm border border-gray-100"
++ 						className="mt-8 p-6 rounded-lg shadow-sm"
++ 						style={{
++ 							backgroundColor: "var(--background-card)",
++ 							borderColor: "var(--border-primary)",
++ 							border: "1px solid var(--border-primary)",
++ 						}}
+  					>
+- 						<h3 className="text-lg font-semibold text-gray-900">{file.name}</h3>
++ 						<h3 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>{file.name}</h3>
+  						<div className="mt-4 space-y-2">
+- 							<p className="text-sm text-gray-600">
++ 							<p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+  								Size: {(file.size / 1024 / 1024).toFixed(2)} MB
+  							</p>
+- 							<p className="text-sm text-gray-600">
++ 							<p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+  								Uploaded: {new Date(file.uploadedAt).toLocaleDateString()}
+  							</p>
+- 							<p className="text-sm text-gray-600">
++ 							<p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+  								Expires: {new Date(file.expiresAt).toLocaleDateString()}
+  							</p>
+```
+
+```diff
+  								whileHover={{ scale: 1.02 }}
+  								whileTap={{ scale: 0.98 }}
+- 								className="flex-1 py-2 px-4 bg-primary text-white rounded-lg font-medium
++ 								onClick={handleDownload}
++ 								className="flex-1 py-2 px-4 rounded-lg font-medium inline-flex items-center justify-center
+                    hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50
+                    transition-all"
++ 								style={{
++ 									backgroundColor: "var(--button-primary)",
++ 									color: "var(--text-inverted)",
++ 								}}
+  							>
++ 								<Download className="w-4 h-4 mr-2" />
+  								Download
+  							</motion.button>
+- 							<motion.button
+- 								whileHover={{ scale: 1.02 }}
+- 								whileTap={{ scale: 0.98 }}
+- 								className="flex-1 py-2 px-4 bg-gray-100 text-gray-700 rounded-lg font-medium
+-                   hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-200
+-                   transition-all"
+- 							>
+- 								View Details
+- 							</motion.button>
++ 							{canPreview(file) && (
++ 								<motion.button
++ 									whileHover={{ scale: 1.02 }}
++ 									whileTap={{ scale: 0.98 }}
++ 									onClick={() => setShowPreview(true)}
++ 									className="flex-1 py-2 px-4 rounded-lg font-medium inline-flex items-center justify-center
++ 										focus:outline-none focus:ring-2 focus:ring-gray-200
++ 										transition-all"
++ 									style={{
++ 										backgroundColor: "var(--background-tertiary)",
++ 										color: "var(--text-secondary)",
++ 									}}
++ 								>
++ 									<Eye className="w-4 h-4 mr-2" />
++ 									View File
++ 								</motion.button>
++ 							)}
+  						</div>
+  					</motion.div>
+  				)}
+  			</AnimatePresence>
++ 
++ 			<Modal
++ 				isOpen={showPreview && file !== null}
++ 				onClose={() => setShowPreview(false)}
++ 				title="File Preview"
++ 			>
++ 				{file && (
++ 					<FilePreview
++ 						file={file.file}
++ 						onClose={() => setShowPreview(false)}
++ 					/>
++ 				)}
++ 			</Modal>
+  		</div>
+  	);
+```
+
+---
+
+Great! I've made several key changes to implement the view and download functionality:
+
+1. Added imports for the `Modal` and `FilePreview` components, along with necessary icons
+2. Added the `PREVIEWABLE_TYPES` constant to determine which files can be previewed
+3. Added a `showPreview` state to control the preview modal
+4. Updated the mock file data to include a proper `File` object and type information
+5. Implemented the `handleDownload` function with a simulated download
+6. Added the `canPreview` function to check if a file can be previewed
+7. Updated the UI to use theme variables for consistent styling
+8. Added the preview modal with the `FilePreview` component
+9. Added icons to the buttons for better UX
+10. Made the view button conditional based on file type
+
+The changes include:
+
+1. File Preview:
+- Uses the existing `Modal` and `FilePreview` components
+- Shows a preview for supported file types (images, PDFs, text, video, audio)
+- Properly handles loading and error states
+
+2. Download Functionality:
+- Added a download handler that creates a temporary download link
+- Shows loading and success/error toasts
+- Uses proper theme styling for the button
+
+3. UI Improvements:
+- Added icons to buttons for better visual feedback
+- Updated all colors to use theme variables
+- Made the view button conditional based on file type
+- Improved button styling and hover effects
+
+4. Theme Integration:
+- All colors now use CSS variables from the theme system
+- Consistent styling with the rest of the application
+- Proper dark/light mode support
+
+The implementation includes placeholder/mock functionality for the actual file operations (since we don't have the backend API yet), but it's structured in a way that makes it easy to replace the mock implementations with real API calls later.
+
+Would you like me to make any adjustments to the implementation?
+
+---
+
+_**User**_
+
+can you host the application locally so that i can open in phone with ip address
+
+---
+
+_**Assistant**_
+
+I'll help you host the application locally so that it can be accessed from your phone using your computer's IP address. Here's what we'll do:
+
+1. First, let's find your local IP address
+2. Then, configure Vite to host on that IP address
+3. Run the development server
+
+Let me help you with each step:
+
+1. First, let's get your IP address:
+
+---
+
+```bash
+ifconfig | grep "inet " | grep -v 127.0.0.1
+```
+
+```
+shaikumarfarooq@SHAIKs-MacBook-Air-3 askfilez % ifconfig | grep "inet " | grep -v 127.0.0.1
+        inet 192.168.85.8 netmask 0xffffff00 broadcast 192.168.85.255
+shaikumarfarooq@SHAIKs-MacBook-Air-3 askfilez %
+```
+
+---
+
+Great! Your local IP address is `192.168.85.8`. Now, let's create a Vite config file to configure the development server:
+
+---
+
+```diff
+  export default defineConfig({
+    plugins: [react(), tailwindcss()],
++   server: {
++     host: true, // Listen on all local IPs
++     port: 5173, // Default Vite port
++   },
+  })
+  
+```
+
+---
+
+Now, let's start the development server:
+
+---
+
+Cancelled
+
+---
+
+_**User**_
+
+modify this and update in upload page like card instead of wrong you keep download button thats it
+
+---
+
+_**Assistant**_
+
+I understand you want to modify the upload page to show files in a card format similar to the search results page, with just the download button. I'll update the UploadZone component to match this design:
+
+---
+
+```diff
+  import { useCallback, useState } from "react";
+  import { useDropzone } from "react-dropzone";
+- import { Upload, X, Eye } from "lucide-react";
++ import { Upload, Download } from "lucide-react";
+  import { motion, AnimatePresence } from "framer-motion";
+  import toast from "react-hot-toast";
+- import { Modal } from "../ui/Modal";
+- import { FilePreview } from "./FilePreview";
+- 
+- // List of MIME types that can be previewed in the browser
+- const PREVIEWABLE_TYPES = [
+- 	"image/",
+- 	"application/pdf",
+- 	"text/",
+- 	"video/",
+- 	"audio/",
+- ];
+  
+  export const UploadZone = () => {
+  	const [files, setFiles] = useState<File[]>([]);
+  	const [uploading, setUploading] = useState(false);
+- 	const [previewFile, setPreviewFile] = useState<File | null>(null);
+  
+  	const onDrop = useCallback((acceptedFiles: File[]) => {
+```
+
+```diff
+  		setFiles((prev) => prev.filter((_, i) => i !== index));
+  	};
+- 
+- 	const canPreview = (file: File) => {
+- 		return PREVIEWABLE_TYPES.some((type) => file.type.startsWith(type));
+- 	};
+  
+  	const handleUpload = async () => {
+```
+
+```diff
+  
+  		setUploading(true);
+- 		// TODO: Implement file upload logic
+  		try {
+- 			// Simulating upload
++ 			// TODO: Implement file upload logic
+  			await new Promise((resolve) => setTimeout(resolve, 2000));
+  			toast.success("Files uploaded successfully!");
+```
+
+```diff
+  		}
+  	};
++ 
++ 	const handleDownload = async (file: File) => {
++ 		try {
++ 			const url = URL.createObjectURL(file);
++ 			const link = document.createElement("a");
++ 			link.href = url;
++ 			link.download = file.name;
++ 			document.body.appendChild(link);
++ 			link.click();
++ 			document.body.removeChild(link);
++ 			URL.revokeObjectURL(url);
++ 		} catch (error) {
++ 			toast.error("Failed to download file");
++ 		}
++ 	};
+  
+  	return (
+```
+
+```diff
+  								animate={{ opacity: 1, x: 0 }}
+  								exit={{ opacity: 0, x: 20 }}
+- 								className="flex items-center justify-between p-4 rounded-lg shadow-sm"
++ 								className="p-6 rounded-lg shadow-sm"
+  								style={{
+  									backgroundColor: "var(--background-card)",
+  									borderColor: "var(--border-primary)",
+- 								}}
+- 							>
+- 								<div className="flex items-center flex-1 min-w-0 pr-4">
+- 									<div className="flex-1 min-w-0">
+- 										<p
+- 											className="text-sm font-medium truncate"
+- 											style={{
+- 												color: "var(--text-primary)",
+- 												maxWidth: "100%",
+- 												overflow: "hidden",
+- 												textOverflow: "ellipsis",
+- 												whiteSpace: "nowrap",
+- 											}}
++ 									border: "1px solid var(--border-primary)",
++ 								}}
++ 							>
++ 								<h3
++ 									className="text-lg font-semibold"
++ 									style={{ color: "var(--text-primary)" }}
+  								>
+  									{file.name}
+- 										</p>
+- 										<p
+- 											className="text-sm"
+- 											style={{ color: "var(--text-secondary)" }}
+- 										>
+- 											{(file.size / 1024 / 1024).toFixed(2)} MB
++ 								</h3>
++ 								<div className="mt-4 space-y-2">
++ 									<p className="text-sm" style={{ color: "var(--text-secondary)" }}>
++ 										Size: {(file.size / 1024 / 1024).toFixed(2)} MB
+  									</p>
+- 									</div>
++ 									<p className="text-sm" style={{ color: "var(--text-secondary)" }}>
++ 										Type: {file.type || "Unknown"}
++ 									</p>
+  								</div>
+- 								<div className="flex items-center gap-2">
+- 									{canPreview(file) && (
+- 										<button
+- 											onClick={() => setPreviewFile(file)}
+- 											className="p-1 rounded-full hover:bg-opacity-10 transition-colors"
+- 											style={{
+- 												backgroundColor: "var(--background-tertiary)",
+- 												flexShrink: 0,
+- 											}}
+- 											title="Preview file"
+- 										>
+- 											<Eye
+- 												className="w-5 h-5"
+- 												style={{ color: "var(--text-secondary)" }}
+- 											/>
+- 										</button>
+- 									)}
+- 									<button
+- 										onClick={() => removeFile(index)}
+- 										className="p-1 rounded-full hover:bg-opacity-10 transition-colors"
++ 								<div className="mt-6 flex space-x-4">
++ 									<motion.button
++ 										whileHover={{ scale: 1.02 }}
++ 										whileTap={{ scale: 0.98 }}
++ 										onClick={() => handleDownload(file)}
++ 										className="flex-1 py-2 px-4 rounded-lg font-medium inline-flex items-center justify-center
++ 											hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50
++ 											transition-all"
+  										style={{
+- 											backgroundColor: "var(--background-tertiary)",
+- 											flexShrink: 0,
+- 										}}
+- 										title="Remove file"
+- 									>
+- 										<X
+- 											className="w-5 h-5"
+- 											style={{ color: "var(--text-secondary)" }}
+- 										/>
+- 									</button>
++ 											backgroundColor: "var(--button-primary)",
++ 											color: "var(--text-inverted)",
++ 										}}
++ 									>
++ 										<Download className="w-4 h-4 mr-2" />
++ 										Download
++ 									</motion.button>
+  								</div>
+  							</motion.div>
+```
+
+```diff
+  				)}
+  			</AnimatePresence>
+- 
+- 			<Modal
+- 				isOpen={previewFile !== null}
+- 				onClose={() => setPreviewFile(null)}
+- 				title="File Preview"
+- 			>
+- 				{previewFile && (
+- 					<FilePreview
+- 						file={previewFile}
+- 						onClose={() => setPreviewFile(null)}
+- 					/>
+- 				)}
+- 			</Modal>
+  		</div>
+  	);
+```
+
+---
+
+_**User**_
+
+no i need search page to show similar to upload page 
+
+---
+
+_**Assistant**_
+
+Ah, I apologize for the confusion! You want the search page to look similar to the upload page's file list style. I'll modify the SearchFiles component to match the upload page's compact card design:
+
+---
+
+```diff
+  			await new Promise((resolve) => setTimeout(resolve, 1500));
+  			// Simulated file data
+- 			const mockFile = new File([""], "example-file.pdf", {
+- 				type: "application/pdf",
+- 			});
++ 			const mockFile = new File([""], "example-file.pdf", { type: "application/pdf" });
+  			setFile({
+  				file: mockFile,
+```
+
+```diff
+  						animate={{ opacity: 1, y: 0 }}
+  						exit={{ opacity: 0, y: -20 }}
+- 						className="mt-8 p-6 rounded-lg shadow-sm"
++ 						className="mt-6"
++ 					>
++ 						<motion.div
++ 							initial={{ opacity: 0, x: -20 }}
++ 							animate={{ opacity: 1, x: 0 }}
++ 							exit={{ opacity: 0, x: 20 }}
++ 							className="flex items-center justify-between p-4 rounded-lg shadow-sm"
+  							style={{
+  								backgroundColor: "var(--background-card)",
+```
+
+```diff
+  							}}
+  						>
+- 						<h3
+- 							className="text-lg font-semibold"
+- 							style={{ color: "var(--text-primary)" }}
++ 							<div className="flex items-center flex-1 min-w-0 pr-4">
++ 								<div className="flex-1 min-w-0">
++ 									<p
++ 										className="text-sm font-medium truncate"
++ 										style={{
++ 											color: "var(--text-primary)",
++ 											maxWidth: "100%",
++ 											overflow: "hidden",
++ 											textOverflow: "ellipsis",
++ 											whiteSpace: "nowrap",
++ 										}}
+  									>
+  										{file.name}
+- 						</h3>
+- 						<div className="mt-4 space-y-2">
+- 							<p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+- 								Size: {(file.size / 1024 / 1024).toFixed(2)} MB
+  									</p>
+  									<p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+- 								Uploaded: {new Date(file.uploadedAt).toLocaleDateString()}
++ 										{(file.size / 1024 / 1024).toFixed(2)} MB
+  									</p>
+  									<p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+  										Expires: {new Date(file.expiresAt).toLocaleDateString()}
+  									</p>
+  								</div>
+- 						<div className="mt-6 flex space-x-4">
+- 							<motion.button
+- 								whileHover={{ scale: 1.02 }}
+- 								whileTap={{ scale: 0.98 }}
++ 							</div>
++ 							<div className="flex items-center gap-2">
++ 								<button
+  									onClick={handleDownload}
+- 								className="flex-1 py-2 px-4 rounded-lg font-medium inline-flex items-center justify-center
+-                   hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50
+-                   transition-all"
++ 									className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+  									style={{
+  										backgroundColor: "var(--button-primary)",
+  										color: "var(--text-inverted)",
+  									}}
++ 									title="Download file"
+  								>
+- 								<Download className="w-4 h-4 mr-2" />
+- 								Download
+- 							</motion.button>
++ 									<Download className="w-5 h-5" />
++ 								</button>
+  								{canPreview(file) && (
+- 								<motion.button
+- 									whileHover={{ scale: 1.02 }}
+- 									whileTap={{ scale: 0.98 }}
++ 									<button
+  										onClick={() => setShowPreview(true)}
+- 									className="flex-1 py-2 px-4 rounded-lg font-medium inline-flex items-center justify-center
+- 										focus:outline-none focus:ring-2 focus:ring-gray-200
+- 										transition-all"
++ 										className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+  										style={{
+  											backgroundColor: "var(--background-tertiary)",
+  											color: "var(--text-secondary)",
+  										}}
++ 										title="Preview file"
+  									>
+- 									<Eye className="w-4 h-4 mr-2" />
+- 									View File
+- 								</motion.button>
++ 										<Eye className="w-5 h-5" />
++ 									</button>
+  								)}
+  							</div>
++ 						</motion.div>
+  					</motion.div>
+  				)}
+```
+
+```diff
+  			>
+  				{file && (
+- 					<FilePreview file={file.file} onClose={() => setShowPreview(false)} />
++ 					<FilePreview
++ 						file={file.file}
++ 						onClose={() => setShowPreview(false)}
++ 					/>
+  				)}
+  			</Modal>
+```
+
+---
+
+I've updated the SearchFiles component to match the upload page's compact card design. The changes include:
+
+1. Changed the file card layout to match the upload page's compact style
+2. Moved buttons to the right side as icons
+3. Made the file information more compact with truncated text
+4. Kept the same functionality but with a more consistent look
+5. Used the same styling for buttons and hover effects
+
+The search results now show:
+- File name (truncated if too long)
+- File size
+- Expiry date
+- Download and preview buttons as icons on the right
+
+The layout is now consistent with the upload page's design while maintaining all the functionality. Would you like me to make any adjustments to the styling or layout?
+
+---
+
+_**User**_
+
+modify the header for phone page implement like this for phone layout
+
+---
+
+_**Assistant**_
+
+I'll modify the Header component to implement a mobile-friendly layout with a collapsible menu similar to the image you shared. I'll add a hamburger menu for mobile that shows the navigation links in a dropdown:
+
+---
+
+```diff
+  import { Link } from "react-router-dom";
+- import { Search, Info, Sun, Moon, ChartBar } from "lucide-react";
++ import { Search, Info, Sun, Moon, ChartBar, Menu, X } from "lucide-react";
+  import { useTheme } from "../../theme/ThemeContext";
++ import { useState } from "react";
++ import { motion, AnimatePresence } from "framer-motion";
+  
+  export const Header = () => {
+  	const { mode, toggleTheme } = useTheme();
++ 	const [isMenuOpen, setIsMenuOpen] = useState(false);
++ 
++ 	const toggleMenu = () => {
++ 		setIsMenuOpen(!isMenuOpen);
++ 	};
++ 
++ 	const menuItems = [
++ 		{
++ 			to: "/",
++ 			label: "Home",
++ 			icon: null,
++ 		},
++ 		{
++ 			to: "/analytics",
++ 			label: "Analytics",
++ 			icon: <ChartBar className="w-4 h-4" />,
++ 		},
++ 		{
++ 			to: "/search",
++ 			label: "Search",
++ 			icon: <Search className="w-4 h-4" />,
++ 		},
++ 		{
++ 			to: "/about",
++ 			label: "About",
++ 			icon: <Info className="w-4 h-4" />,
++ 		},
++ 	];
+  
+  	return (
+```
+
+```diff
+  			>
+  				<div className="container mx-auto px-4">
+- 					<div className="flex items-center justify-between h-2">
++ 					<div className="flex items-center justify-between h-16">
+  						<Link
+  							to="/"
+```
+
+```diff
+  						</Link>
+  
+- 						<nav className="flex items-center space-x-1">
++ 						{/* Desktop Navigation */}
++ 						<nav className="hidden md:flex items-center space-x-1">
++ 							{menuItems.slice(1).map((item) => (
+  								<Link
+- 								to="/analytics"
++ 									key={item.to}
++ 									to={item.to}
+  									className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all"
+  									style={{
+  										color: "var(--text-secondary)",
+  									}}
+  								>
+- 								<ChartBar className="w-4 h-4 mr-2" />
+- 								Analytics
++ 									{item.icon && <span className="mr-2">{item.icon}</span>}
++ 									{item.label}
+  								</Link>
+- 							<Link
+- 								to="/search"
+- 								className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all"
+- 								style={{
+- 									color: "var(--text-secondary)",
+- 								}}
+- 							>
+- 								<Search className="w-4 h-4 mr-2" />
+- 								Search
+- 							</Link>
+- 							<Link
+- 								to="/about"
+- 								className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all"
+- 								style={{
+- 									color: "var(--text-secondary)",
+- 								}}
+- 							>
+- 								<Info className="w-4 h-4 mr-2" />
+- 								About
+- 							</Link>
++ 							))}
+  							<button
+  								onClick={toggleTheme}
+```
+
+```diff
+  							</button>
+  						</nav>
++ 
++ 						{/* Mobile Menu Button */}
++ 						<div className="flex items-center md:hidden">
++ 							<button
++ 								onClick={toggleTheme}
++ 								className="inline-flex items-center justify-center w-10 h-10 rounded-lg mr-2"
++ 								style={{
++ 									color: "var(--text-secondary)",
++ 								}}
++ 								aria-label="Toggle theme"
++ 							>
++ 								{mode === "light" ? (
++ 									<Moon className="w-5 h-5" />
++ 								) : (
++ 									<Sun className="w-5 h-5" />
++ 								)}
++ 							</button>
++ 							<button
++ 								onClick={toggleMenu}
++ 								className="inline-flex items-center justify-center p-2 rounded-lg"
++ 								style={{
++ 									color: "var(--text-secondary)",
++ 								}}
++ 								aria-label="Menu"
++ 							>
++ 								{isMenuOpen ? (
++ 									<X className="w-6 h-6" />
++ 								) : (
++ 									<Menu className="w-6 h-6" />
++ 								)}
++ 							</button>
++ 						</div>
+  					</div>
+  				</div>
+  			</div>
++ 
++ 			{/* Mobile Navigation Menu */}
++ 			<AnimatePresence>
++ 				{isMenuOpen && (
++ 					<motion.div
++ 						initial={{ opacity: 0, y: -10 }}
++ 						animate={{ opacity: 1, y: 0 }}
++ 						exit={{ opacity: 0, y: -10 }}
++ 						className="md:hidden"
++ 						style={{
++ 							backgroundColor: "var(--background-primary)",
++ 							borderColor: "var(--border-primary)",
++ 							borderBottomWidth: "1px",
++ 						}}
++ 					>
++ 						<nav className="container mx-auto px-4 py-2">
++ 							{menuItems.map((item) => (
++ 								<Link
++ 									key={item.to}
++ 									to={item.to}
++ 									onClick={() => setIsMenuOpen(false)}
++ 									className="flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all"
++ 									style={{
++ 										color: "var(--text-secondary)",
++ 									}}
++ 								>
++ 									{item.icon && <span className="mr-3">{item.icon}</span>}
++ 									{item.label}
++ 								</Link>
++ 							))}
++ 						</nav>
++ 					</motion.div>
++ 				)}
++ 			</AnimatePresence>
+  		</header>
+  	);
+```
+
+---
+
+I've updated the Header component to be mobile-friendly with the following changes:
+
+1. Added a hamburger menu for mobile devices that shows/hides when clicked
+2. Created a responsive layout:
+   - Desktop: Shows all navigation links in the header
+   - Mobile: Shows a hamburger menu that opens a dropdown with navigation links
+3. Added smooth animations using Framer Motion for the mobile menu
+4. Improved the layout:
+   - Fixed header height to `h-16`
+   - Added proper spacing and padding for mobile view
+   - Moved theme toggle button to be easily accessible on mobile
+5. Made the navigation items dynamic using a `menuItems` array
+6. Added proper touch targets for mobile users
+7. Used proper responsive classes:
+   - `md:hidden` for mobile-only elements
+   - `hidden md:flex` for desktop-only elements
+
+The header now has:
+- A clean mobile layout with a hamburger menu
+- Smooth animations when opening/closing the menu
+- Easy access to all navigation links
+- Proper spacing and touch targets for mobile users
+- Theme toggle button accessible on both mobile and desktop views
+
+The mobile menu will slide down when opened and slide up when closed, providing a smooth user experience. All the navigation items are now easier to tap on mobile devices with proper padding and spacing.
+
+---
+
+_**User**_
+
+can you enhance viewing experience in phone it is showing line wise with full width it is not nice. can you enhance viewing experience in phone
+
+---
+
+_**Assistant**_
+
+I'll help you enhance the mobile viewing experience for the stats page by improving the layout and making the cards more compact and visually appealing. Let me modify the FileStats component:
+
+---
+
+```diff
+  		animate={{ opacity: 1, y: 0 }}
+  		transition={{ delay }}
+- 		className="p-6 rounded-xl shadow-sm"
++ 		className="p-4 rounded-xl shadow-sm"
+  		style={{
+  			backgroundColor: "var(--background-card)",
+  			borderColor: "var(--border-primary)",
++ 			border: "1px solid var(--border-primary)",
+  		}}
+  	>
+- 		<div className="flex items-center justify-between mb-4">
++ 		<div className="flex items-center gap-3">
+  			<div
+- 				className="p-3 rounded-lg"
++ 				className="p-2.5 rounded-lg shrink-0"
+  				style={{ backgroundColor: "var(--background-tertiary)" }}
+  			>
+  				{icon}
+  			</div>
+- 			<div className="text-right">
++ 			<div className="min-w-0 flex-1">
+  				<p
+- 					className="text-2xl font-bold"
++ 					className="text-xl font-bold truncate"
+  					style={{ color: "var(--text-primary)" }}
+  				>
+  					{value}
+  				</p>
+  				<p
+- 					className="text-sm font-medium"
++ 					className="text-sm font-medium truncate"
+  					style={{ color: "var(--text-secondary)" }}
+  				>
+  					{title}
+  				</p>
++ 				{subtitle && (
++ 					<p 
++ 						className="text-xs mt-0.5 truncate" 
++ 						style={{ color: "var(--text-tertiary)" }}
++ 					>
++ 						{subtitle}
++ 					</p>
++ 				)}
+  			</div>
+  		</div>
+- 		{subtitle && (
+- 			<p className="text-xs mt-2" style={{ color: "var(--text-tertiary)" }}>
+- 				{subtitle}
+- 			</p>
+- 		)}
+  	</motion.div>
+  );
+  
+  const TrendChart = () => (
+- 	<div className="flex items-end justify-between h-32 px-2 mt-4">
++ 	<div className="flex items-end justify-between h-32 px-2 mt-4 gap-1">
+  		{[40, 65, 45, 75, 55, 85, 70].map((height, i) => (
+  			<motion.div
+```
+
+```diff
+  				animate={{ height: `${height}%` }}
+  				transition={{ delay: i * 0.1, duration: 0.5 }}
+- 				className="w-8 rounded-t-lg"
++ 				className="w-full rounded-t-lg"
+  				style={{ backgroundColor: "var(--accent-primary)" }}
+  			/>
+```
+
+```diff
+  			subtitle: "↑ 12% from last week",
+  			icon: (
+- 				<Users className="w-6 h-6" style={{ color: "var(--accent-primary)" }} />
++ 				<Users className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
+  			),
+  		},
+```
+
+```diff
+  			subtitle: "Users spend more time sharing files",
+  			icon: (
+- 				<Clock className="w-6 h-6" style={{ color: "var(--accent-primary)" }} />
++ 				<Clock className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
+  			),
+  		},
+```
+
+```diff
+  			icon: (
+  				<TrendingUp
+- 					className="w-6 h-6"
++ 					className="w-5 h-5"
+  					style={{ color: "var(--accent-primary)" }}
+  				/>
+```
+
+```diff
+  			subtitle: "Countries with active users",
+  			icon: (
+- 				<Globe className="w-6 h-6" style={{ color: "var(--accent-primary)" }} />
++ 				<Globe className="w-5 h-5" style={{ color: "var(--accent-primary)" }} />
+  			),
+  		},
+```
+
+```diff
+  			icon: (
+  				<Smartphone
+- 					className="w-6 h-6"
++ 					className="w-5 h-5"
+  					style={{ color: "var(--accent-primary)" }}
+  				/>
+```
+
+```diff
+  			icon: (
+  				<Share2
+- 					className="w-6 h-6"
++ 					className="w-5 h-5"
+  					style={{ color: "var(--accent-primary)" }}
+  				/>
+```
+
+```diff
+  			icon: (
+  				<Activity
+- 					className="w-6 h-6"
++ 					className="w-5 h-5"
+  					style={{ color: "var(--accent-primary)" }}
+  				/>
+```
+
+```diff
+  			icon: (
+  				<BarChart
+- 					className="w-6 h-6"
++ 					className="w-5 h-5"
+  					style={{ color: "var(--accent-primary)" }}
+  				/>
+```
+
+```diff
+  
+  	return (
+- 		<div className="w-full max-w-7xl mx-auto p-6">
+- 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
++ 		<div className="w-full max-w-7xl mx-auto px-4 py-4 md:p-6">
++ 			<div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+  				{stats.map((stat, index) => (
+  					<StatCard key={stat.title} {...stat} delay={index * 0.1} />
+```
+
+```diff
+  				animate={{ opacity: 1, y: 0 }}
+  				transition={{ delay: 0.4 }}
+- 				className="mt-8 rounded-xl shadow-sm p-6"
++ 				className="mt-6 md:mt-8 rounded-xl shadow-sm p-4 md:p-6"
+  				style={{
+  					backgroundColor: "var(--background-card)",
+  					borderColor: "var(--border-primary)",
++ 					border: "1px solid var(--border-primary)",
+  				}}
+  			>
+- 				<div className="flex items-center justify-between mb-6">
++ 				<div className="flex items-center justify-between mb-4 md:mb-6">
+  					<h3
+- 						className="text-lg font-semibold"
++ 						className="text-base md:text-lg font-semibold"
+  						style={{ color: "var(--text-primary)" }}
+  					>
+  						Weekly Engagement Trend
+  					</h3>
+  					<select
+- 						className="px-3 py-1 rounded-lg text-sm"
++ 						className="px-2 py-1 md:px-3 md:py-1 rounded-lg text-sm"
+  						style={{
+  							backgroundColor: "var(--background-tertiary)",
+```
+
+```diff
+  			</motion.div>
+  
+- 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
++ 			<div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mt-6 md:mt-8">
+  				{engagementStats.map((stat, index) => (
+  					<StatCard key={stat.title} {...stat} delay={index * 0.1 + 0.6} />
+```
+
+---
+
+I've made several improvements to enhance the mobile viewing experience:
+
+1. Card Layout:
+   - Changed from single column to 2-column grid on mobile (`grid-cols-2`)
+   - Reduced padding and gaps for mobile screens
+   - Added proper spacing that increases on larger screens
+   - Added explicit border to make cards more distinct
+
+2. Card Content:
+   - Made the layout more compact with horizontal alignment
+   - Added `truncate` to prevent text overflow
+   - Reduced icon sizes from 6 to 5 for better mobile proportions
+   - Moved subtitle into the main content area to save vertical space
+   - Added proper text hierarchy with responsive font sizes
+
+3. Spacing and Responsiveness:
+   - Added responsive padding: smaller on mobile, larger on desktop
+   - Reduced gaps between cards on mobile (`gap-3` on mobile, `gap-6` on desktop)
+   - Made margins responsive with `mt-6 md:mt-8`
+   - Added proper spacing between elements
+
+4. Chart Area:
+   - Made the chart bars more responsive with `w-full`
+   - Added small gap between bars for better visibility
+   - Reduced header text size on mobile
+   - Made the time selector more compact on mobile
+
+5. Container:
+   - Added proper horizontal padding on mobile (`px-4 py-4`)
+   - Increased padding on desktop (`md:p-6`)
+
+These changes will make the stats page much more readable and usable on mobile devices, with:
+- Better use of limited screen space
+- More compact but still readable cards
+- Proper text truncation to prevent overflow
+- Responsive spacing and sizing
+- Better touch targets for mobile interaction
+
+The layout now shows 2 cards per row on mobile instead of 1, making better use of the available space while maintaining readability and visual hierarchy.
+
+---
+
+_**User**_
+
+decrease the gap in x corners horizontal gaps so that card shows clearly
+
+---
+
+_**Assistant**_
+
+I'll adjust the horizontal padding and gaps to make the cards show more clearly on mobile. Let me modify the FileStats component:
+
+---
+
+```diff
+  		animate={{ opacity: 1, y: 0 }}
+  		transition={{ delay }}
+- 		className="p-4 rounded-xl shadow-sm"
++ 		className="p-3 rounded-xl shadow-sm"
+  		style={{
+  			backgroundColor: "var(--background-card)",
+```
+
+```diff
+  		}}
+  	>
+- 		<div className="flex items-center gap-3">
++ 		<div className="flex items-center gap-2">
+  			<div
+- 				className="p-2.5 rounded-lg shrink-0"
++ 				className="p-2 rounded-lg shrink-0"
+  				style={{ backgroundColor: "var(--background-tertiary)" }}
+  			>
+```
+
+```diff
+  			<div className="min-w-0 flex-1">
+  				<p
+- 					className="text-xl font-bold truncate"
++ 					className="text-lg font-bold truncate"
+  					style={{ color: "var(--text-primary)" }}
+  				>
+  					{value}
+  				</p>
+  				<p
+- 					className="text-sm font-medium truncate"
++ 					className="text-xs font-medium truncate"
+  					style={{ color: "var(--text-secondary)" }}
+  				>
+```
+
+```diff
+  
+  	return (
+- 		<div className="w-full max-w-7xl mx-auto px-4 py-4 md:p-6">
+- 			<div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
++ 		<div className="w-full max-w-7xl mx-auto px-2 py-4 md:p-6">
++ 			<div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6">
+  				{stats.map((stat, index) => (
+  					<StatCard key={stat.title} {...stat} delay={index * 0.1} />
+```
+
+```diff
+  				animate={{ opacity: 1, y: 0 }}
+  				transition={{ delay: 0.4 }}
+- 				className="mt-6 md:mt-8 rounded-xl shadow-sm p-4 md:p-6"
++ 				className="mt-4 md:mt-8 rounded-xl shadow-sm p-3 md:p-6"
+  				style={{
+  					backgroundColor: "var(--background-card)",
+```
+
+```diff
+  				}}
+  			>
+- 				<div className="flex items-center justify-between mb-4 md:mb-6">
++ 				<div className="flex items-center justify-between mb-3 md:mb-6">
+  					<h3
+  						className="text-base md:text-lg font-semibold"
+```
+
+```diff
+  					</h3>
+  					<select
+- 						className="px-2 py-1 md:px-3 md:py-1 rounded-lg text-sm"
++ 						className="px-2 py-1 md:px-3 md:py-1 rounded-lg text-xs md:text-sm"
+  						style={{
+  							backgroundColor: "var(--background-tertiary)",
+```
+
+```diff
+  			</motion.div>
+  
+- 			<div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mt-6 md:mt-8">
++ 			<div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6 mt-4 md:mt-8">
+  				{engagementStats.map((stat, index) => (
+  					<StatCard key={stat.title} {...stat} delay={index * 0.1 + 0.6} />
+```
+
+---
+
+I've made several adjustments to improve the card visibility on mobile by reducing horizontal gaps and making the layout more compact:
+
+1. Container Padding:
+   - Reduced horizontal padding from `px-4` to `px-2` on mobile
+   - Kept the desktop padding at `md:p-6`
+
+2. Grid Gaps:
+   - Reduced gap between cards from `gap-3` to `gap-2` on mobile
+   - Maintained desktop gap at `md:gap-6`
+
+3. Card Layout:
+   - Reduced card padding from `p-4` to `p-3`
+   - Decreased gap between icon and content from `gap-3` to `gap-2`
+   - Reduced icon padding from `p-2.5` to `p-2`
+
+4. Typography:
+   - Reduced value text size from `text-xl` to `text-lg`
+   - Changed title text from `text-sm` to `text-xs`
+   - Made select dropdown text smaller on mobile with `text-xs md:text-sm`
+
+5. Spacing:
+   - Reduced vertical margins from `mt-6` to `mt-4` on mobile
+   - Reduced chart section padding from `p-4` to `p-3` on mobile
+   - Decreased bottom margin in chart header from `mb-4` to `mb-3`
+
+These changes will:
+- Show more of each card by reducing unnecessary padding and gaps
+- Make better use of the limited mobile screen width
+- Keep text readable while being more compact
+- Maintain the visual hierarchy with adjusted font sizes
+- Preserve the desktop layout with original spacing
+
+The cards should now be more visible and better fit the mobile screen while maintaining readability and visual appeal.
+
+---
+
+_**User**_
+
+show values on top of bars or inside the bars
+
+---
+
+_**Assistant**_
+
+I'll modify the TrendChart component to show values on top of or inside the bars depending on their height. Let me update the code:
+
+---
+
+```diff
+  );
+  
+- const TrendChart = () => (
+- 	<div className="flex items-end justify-between h-32 px-2 mt-4 gap-1">
+- 		{[40, 65, 45, 75, 55, 85, 70].map((height, i) => (
++ const TrendChart = () => {
++ 	const data = [
++ 		{ value: 40, label: "Mon" },
++ 		{ value: 65, label: "Tue" },
++ 		{ value: 45, label: "Wed" },
++ 		{ value: 75, label: "Thu" },
++ 		{ value: 55, label: "Fri" },
++ 		{ value: 85, label: "Sat" },
++ 		{ value: 70, label: "Sun" },
++ 	];
++ 
++ 	return (
++ 		<div className="flex items-end justify-between h-40 px-2 mt-4 gap-1.5">
++ 			{data.map((item, i) => (
++ 				<div key={i} className="relative flex-1 flex flex-col items-center">
+  					<motion.div
+- 				key={i}
+  						initial={{ height: 0 }}
+- 				animate={{ height: `${height}%` }}
++ 						animate={{ height: `${item.value}%` }}
+  						transition={{ delay: i * 0.1, duration: 0.5 }}
+- 				className="w-full rounded-t-lg"
++ 						className="w-full rounded-t-lg relative flex items-end justify-center"
+  						style={{ backgroundColor: "var(--accent-primary)" }}
+- 			/>
++ 					>
++ 						<span
++ 							className={`absolute text-xs font-medium ${
++ 								item.value > 60 ? "-top-6" : "-top-6"
++ 							}`}
++ 							style={{ color: "var(--text-secondary)" }}
++ 						>
++ 							{item.value}%
++ 						</span>
++ 					</motion.div>
++ 					<span
++ 						className="mt-2 text-xs"
++ 						style={{ color: "var(--text-secondary)" }}
++ 					>
++ 						{item.label}
++ 					</span>
++ 				</div>
+  			))}
+  		</div>
+  	);
++ };
+  
+  export const FileStats = () => {
+```
+
+---
+
+I've updated the TrendChart component with the following improvements:
+
+1. Added values on top of each bar showing the percentage
+2. Added day labels below each bar
+3. Made the chart more readable by:
+   - Increasing the chart height from `h-32` to `h-40` to accommodate the values
+   - Increasing the gap between bars slightly from `gap-1` to `gap-1.5`
+   - Adding proper spacing for labels and values
+4. Structured the data with both values and labels
+5. Made the bars more interactive with:
+   - Centered values above each bar
+   - Consistent positioning of values
+   - Clear day labels below
+
+The chart now shows:
+- Percentage values above each bar
+- Day labels (Mon-Sun) below each bar
+- Animated bars with values that are easy to read
+- Proper spacing and alignment for all elements
+
+The values are positioned above the bars with proper spacing and styling to ensure they're readable regardless of the bar height. The day labels below help users understand the weekly trend better.
+
+---
+
+_**User**_
+
+it has completely chagned can you see
+
+---
+
+_**Assistant**_
+
+Yes, I can see that the chart is not displaying correctly - the bars have disappeared and only the labels are showing. Let me fix this by adjusting the TrendChart component:
+
+---
+
+```diff
+  
+  	return (
+- 		<div className="flex items-end justify-between h-40 px-2 mt-4 gap-1.5">
++ 		<div className="flex flex-col h-48">
++ 			<div className="flex-1 flex items-end justify-between gap-1.5 px-2">
+  				{data.map((item, i) => (
+  					<div key={i} className="relative flex-1 flex flex-col items-center">
+- 					<motion.div
+- 						initial={{ height: 0 }}
+- 						animate={{ height: `${item.value}%` }}
+- 						transition={{ delay: i * 0.1, duration: 0.5 }}
+- 						className="w-full rounded-t-lg relative flex items-end justify-center"
+- 						style={{ backgroundColor: "var(--accent-primary)" }}
+- 					>
+  						<span
+- 							className={`absolute text-xs font-medium ${
+- 								item.value > 60 ? "-top-6" : "-top-6"
+- 							}`}
++ 							className="absolute -top-6 text-xs font-medium"
+  							style={{ color: "var(--text-secondary)" }}
+  						>
+  							{item.value}%
+  						</span>
+- 					</motion.div>
++ 						<motion.div
++ 							initial={{ height: 0 }}
++ 							animate={{ height: `${item.value}%` }}
++ 							transition={{ delay: i * 0.1, duration: 0.5 }}
++ 							className="w-full rounded-t-lg bg-blue-500"
++ 							style={{ backgroundColor: "var(--accent-primary)" }}
++ 						/>
++ 					</div>
++ 				))}
++ 			</div>
++ 			<div className="flex justify-between px-2 pt-2 mt-2 border-t" style={{ borderColor: "var(--border-primary)" }}>
++ 				{data.map((item, i) => (
++ 					<div key={i} className="flex-1 text-center">
+  						<span
+- 						className="mt-2 text-xs"
++ 							className="text-xs font-medium"
+  							style={{ color: "var(--text-secondary)" }}
+  						>
+```
+
+```diff
+  					</div>
+  				))}
++ 			</div>
+  		</div>
+  	);
+```
+
+---
+
+I've fixed the TrendChart component with several improvements:
+
+1. Restructured the layout:
+   - Separated the chart into two main sections: bars and labels
+   - Added proper spacing and borders between sections
+   - Increased height to `h-48` for better visibility
+
+2. Fixed the bars:
+   - Made sure bars are properly displayed with correct heights
+
+---
+

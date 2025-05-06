@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { Modal } from "../ui/Modal";
 import { FilePreview } from "./FilePreview";
+import axios from "axios";
 
 // List of MIME types that can be previewed in the browser
 const PREVIEWABLE_TYPES = [
@@ -15,10 +16,16 @@ const PREVIEWABLE_TYPES = [
 	"audio/",
 ];
 
+// Backend API URL
+const API_URL = process.env.BACKEND_API_URL || "http://localhost:3000/api";
+
 export const UploadZone = () => {
 	const [files, setFiles] = useState<File[]>([]);
 	const [uploading, setUploading] = useState(false);
 	const [previewFile, setPreviewFile] = useState<File | null>(null);
+	const [uploadProgress, setUploadProgress] = useState<{
+		[key: string]: number;
+	}>({});
 
 	const onDrop = useCallback((acceptedFiles: File[]) => {
 		setFiles((prev) => [...prev, ...acceptedFiles]);
@@ -31,6 +38,12 @@ export const UploadZone = () => {
 
 	const removeFile = (index: number) => {
 		setFiles((prev) => prev.filter((_, i) => i !== index));
+		// Also remove progress for this file if it exists
+		setUploadProgress((prev) => {
+			const newProgress = { ...prev };
+			delete newProgress[files[index].name];
+			return newProgress;
+		});
 	};
 
 	const canPreview = (file: File) => {
@@ -44,14 +57,53 @@ export const UploadZone = () => {
 		}
 
 		setUploading(true);
-		// TODO: Implement file upload logic
+
 		try {
-			// Simulating upload
-			await new Promise((resolve) => setTimeout(resolve, 2000));
+			const uploadPromises = files.map(async (file) => {
+				const formData = new FormData();
+				formData.append("file", file);
+
+				try {
+					const config = {
+						headers: {
+							"Content-Type": "multipart/form-data",
+						},
+						onUploadProgress: (progressEvent: {
+							loaded: number;
+							total?: number;
+						}) => {
+							if (progressEvent.total) {
+								const progress = Math.round(
+									(progressEvent.loaded * 100) / progressEvent.total
+								);
+								setUploadProgress((prev) => ({
+									...prev,
+									[file.name]: progress,
+								}));
+							}
+						},
+					} as const;
+
+					const response = await axios.post(
+						`${API_URL}/files/upload`,
+						formData,
+						config
+					);
+
+					return response.data;
+				} catch (error) {
+					console.error(`Error uploading ${file.name}:`, error);
+					throw error;
+				}
+			});
+
+			await Promise.all(uploadPromises);
 			toast.success("Files uploaded successfully!");
 			setFiles([]);
+			setUploadProgress({});
 		} catch (error) {
-			toast.error("Failed to upload files");
+			console.error("Upload error:", error);
+			toast.error("Failed to upload some files");
 		} finally {
 			setUploading(false);
 		}

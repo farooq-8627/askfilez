@@ -14,10 +14,23 @@ const PREVIEWABLE_TYPES = [
 	"audio/",
 ];
 
+interface FileData {
+	id: string;
+	name: string;
+	filename: string;
+	size: number;
+	mimetype: string;
+	uploadDate: string;
+	expiryDate: string;
+	downloads: number;
+	groupCodes: string[];
+}
+
 export const SearchFiles = () => {
 	const [code, setCode] = useState("");
 	const [searching, setSearching] = useState(false);
-	const [file, setFile] = useState<any>(null);
+	const [files, setFiles] = useState<FileData[]>([]);
+	const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
 	const [showPreview, setShowPreview] = useState(false);
 
 	const handleSearch = async (e: React.FormEvent) => {
@@ -29,53 +42,97 @@ export const SearchFiles = () => {
 
 		setSearching(true);
 		try {
-			// TODO: Implement actual search logic
-			await new Promise((resolve) => setTimeout(resolve, 1500));
-			// Simulated file data
-			const mockFile = new File([""], "example-file.pdf", {
-				type: "application/pdf",
-			});
-			setFile({
-				file: mockFile,
-				name: "example-file.pdf",
-				size: 1024 * 1024 * 2.5, // 2.5MB
-				type: "application/pdf",
-				uploadedAt: new Date().toISOString(),
-				expiresAt: new Date(
-					Date.now() + 1000 * 60 * 60 * 24 * 21
-				).toISOString(), // 21 days
-			});
+			const response = await fetch(
+				`http://localhost:3000/api/files/group/${code.trim().toUpperCase()}`
+			);
+
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.error || "Failed to find files");
+			}
+
+			const data = await response.json();
+			console.log("Search results:", data);
+			setFiles(data);
 		} catch (error) {
-			toast.error("File not found");
-			setFile(null);
+			console.error("Search error:", error);
+			toast.error(
+				error instanceof Error ? error.message : "Failed to find files"
+			);
+			setFiles([]);
 		} finally {
 			setSearching(false);
 		}
 	};
 
-	const handleDownload = async () => {
+	const handleDownload = async (file: FileData) => {
 		try {
-			// TODO: Implement actual download logic
-			// For now, we'll simulate a download delay
-			toast.loading("Preparing download...");
-			await new Promise((resolve) => setTimeout(resolve, 1500));
+			console.log("Attempting to download file:", file);
 
-			// Create a mock download link
+			// Use file._id for downloading
+			const downloadUrl = `http://localhost:3000/api/files/download/${code
+				.trim()
+				.toUpperCase()}/${file.id}`;
+			console.log("Download URL:", downloadUrl);
+
+			toast.loading("Preparing download...");
+			const response = await fetch(downloadUrl);
+
+			if (!response.ok) {
+				const error = await response
+					.json()
+					.catch(() => ({ error: "Download failed" }));
+				throw new Error(error.error || "Failed to download file");
+			}
+
+			// Create a blob from the response
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+
+			// Create an invisible download link
 			const link = document.createElement("a");
-			link.href = URL.createObjectURL(file.file);
-			link.download = file.name;
+			link.href = url;
+			link.download = file.name; // Use original file name for the downloaded file
+
+			// Set download attribute to force download to Downloads folder
+			link.setAttribute("download", file.name);
+
+			// Append to body, click, and cleanup
 			document.body.appendChild(link);
 			link.click();
+
+			// Cleanup
+			window.URL.revokeObjectURL(url);
 			document.body.removeChild(link);
 
+			toast.dismiss();
 			toast.success("Download started");
 		} catch (error) {
-			toast.error("Failed to download file");
+			toast.dismiss();
+			console.error("Download error:", error);
+			toast.error(
+				error instanceof Error ? error.message : "Failed to download file"
+			);
 		}
 	};
 
-	const canPreview = (file: any) => {
-		return PREVIEWABLE_TYPES.some((type) => file.type.startsWith(type));
+	const canPreview = (file: FileData) => {
+		return PREVIEWABLE_TYPES.some((type) => file.mimetype.startsWith(type));
+	};
+
+	const renderGroupCodes = (file: FileData, currentCode: string) => {
+		if (!file.groupCodes || file.groupCodes.length <= 1) return null;
+
+		const otherCodes = file.groupCodes.filter(
+			(gc) => gc !== currentCode.trim().toUpperCase()
+		);
+		if (otherCodes.length === 0) return null;
+
+		return (
+			<p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+				Also available with codes: {otherCodes.join(", ")}
+			</p>
+		);
 	};
 
 	return (
@@ -86,7 +143,7 @@ export const SearchFiles = () => {
 						type="text"
 						value={code}
 						onChange={(e) => setCode(e.target.value)}
-						placeholder="Enter file code (e.g., d3g45h)"
+						placeholder="Enter file code (e.g., AB12CD34)"
 						className="w-full px-4 py-3 pl-12 border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
 						style={{
 							backgroundColor: "var(--background-primary)",
@@ -105,103 +162,116 @@ export const SearchFiles = () => {
 					whileTap={{ scale: 0.98 }}
 					type="submit"
 					disabled={searching}
-					className="w-full py-3 px-4 rounded-lg font-medium
-            hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50
-            disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+					className="w-full py-3 px-4 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
 					style={{
 						backgroundColor: "var(--button-primary)",
 						color: "var(--text-inverted)",
 					}}
 				>
-					{searching ? "Searching..." : "Search File"}
+					{searching ? "Searching..." : "Search Files"}
 				</motion.button>
 			</form>
 
 			<AnimatePresence>
-				{file && (
+				{files.length > 0 && (
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						exit={{ opacity: 0, y: -20 }}
-						className="mt-6"
+						className="mt-6 space-y-4"
 					>
-						<motion.div
-							initial={{ opacity: 0, x: -20 }}
-							animate={{ opacity: 1, x: 0 }}
-							exit={{ opacity: 0, x: 20 }}
-							className="flex items-center justify-between p-4 rounded-lg shadow-sm"
-							style={{
-								backgroundColor: "var(--background-card)",
-								borderColor: "var(--border-primary)",
-								border: "1px solid var(--border-primary)",
-							}}
-						>
-							<div className="flex items-center flex-1 min-w-0 pr-4">
-								<div className="flex-1 min-w-0">
-									<p
-										className="text-sm font-medium truncate"
-										style={{
-											color: "var(--text-primary)",
-											maxWidth: "100%",
-											overflow: "hidden",
-											textOverflow: "ellipsis",
-											whiteSpace: "nowrap",
-										}}
-									>
-										{file.name}
-									</p>
-									<p
-										className="text-sm"
-										style={{ color: "var(--text-secondary)" }}
-									>
-										{(file.size / 1024 / 1024).toFixed(2)} MB
-									</p>
-									<p
-										className="text-sm"
-										style={{ color: "var(--text-secondary)" }}
-									>
-										Expires: {new Date(file.expiresAt).toLocaleDateString()}
-									</p>
+						{files.map((file) => (
+							<motion.div
+								key={file.id}
+								initial={{ opacity: 0, x: -20 }}
+								animate={{ opacity: 1, x: 0 }}
+								exit={{ opacity: 0, x: 20 }}
+								className="flex items-center justify-between p-4 rounded-lg shadow-sm"
+								style={{
+									backgroundColor: "var(--background-card)",
+									borderColor: "var(--border-primary)",
+									border: "1px solid var(--border-primary)",
+								}}
+							>
+								<div className="flex items-center flex-1 min-w-0 pr-4">
+									<div className="flex-1 min-w-0">
+										<p
+											className="text-sm font-medium truncate"
+											style={{
+												color: "var(--text-primary)",
+												maxWidth: "100%",
+												overflow: "hidden",
+												textOverflow: "ellipsis",
+												whiteSpace: "nowrap",
+											}}
+										>
+											{file.name}
+										</p>
+										<p
+											className="text-sm"
+											style={{ color: "var(--text-secondary)" }}
+										>
+											{(file.size / 1024 / 1024).toFixed(2)} MB
+										</p>
+										<p
+											className="text-sm"
+											style={{ color: "var(--text-secondary)" }}
+										>
+											Expires: {new Date(file.expiryDate).toLocaleDateString()}
+										</p>
+										{renderGroupCodes(file, code)}
+									</div>
 								</div>
-							</div>
-							<div className="flex items-center gap-2">
-								<button
-									onClick={handleDownload}
-									className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
-									style={{
-										backgroundColor: "var(--button-primary)",
-										color: "var(--text-inverted)",
-									}}
-									title="Download file"
-								>
-									<Download className="w-5 h-5" />
-								</button>
-								{canPreview(file) && (
+								<div className="flex items-center gap-2">
 									<button
-										onClick={() => setShowPreview(true)}
+										onClick={() => handleDownload(file)}
 										className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
 										style={{
-											backgroundColor: "var(--background-tertiary)",
-											color: "var(--text-secondary)",
+											backgroundColor: "var(--button-primary)",
+											color: "var(--text-inverted)",
 										}}
-										title="Preview file"
+										title="Download file"
 									>
-										<Eye className="w-5 h-5" />
+										<Download className="w-5 h-5" />
 									</button>
-								)}
-							</div>
-						</motion.div>
+									{canPreview(file) && (
+										<button
+											onClick={() => {
+												setSelectedFile(file);
+												setShowPreview(true);
+											}}
+											className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+											style={{
+												backgroundColor: "var(--background-tertiary)",
+												color: "var(--text-secondary)",
+											}}
+											title="Preview file"
+										>
+											<Eye className="w-5 h-5" />
+										</button>
+									)}
+								</div>
+							</motion.div>
+						))}
 					</motion.div>
 				)}
 			</AnimatePresence>
 
 			<Modal
-				isOpen={showPreview && file !== null}
-				onClose={() => setShowPreview(false)}
+				isOpen={showPreview && selectedFile !== null}
+				onClose={() => {
+					setShowPreview(false);
+					setSelectedFile(null);
+				}}
 				title="File Preview"
 			>
-				{file && (
-					<FilePreview file={file.file} onClose={() => setShowPreview(false)} />
+				{selectedFile && (
+					<div className="text-center p-4">
+						<p style={{ color: "var(--text-primary)" }}>
+							Preview not available in search mode. Please download the file to
+							view it.
+						</p>
+					</div>
 				)}
 			</Modal>
 		</div>

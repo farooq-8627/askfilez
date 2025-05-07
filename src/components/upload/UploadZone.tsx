@@ -1,11 +1,22 @@
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, X, Eye } from "lucide-react";
+import {
+	Upload,
+	X,
+	Eye,
+	FileIcon,
+	Image,
+	Film,
+	Music,
+	FileText,
+	FileArchive,
+	Code,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { Modal } from "../ui/Modal";
 import { FilePreview } from "./FilePreview";
-import axios from "axios";
+import { format } from "date-fns";
 
 // List of MIME types that can be previewed in the browser
 const PREVIEWABLE_TYPES = [
@@ -16,20 +27,71 @@ const PREVIEWABLE_TYPES = [
 	"audio/",
 ];
 
-// Backend API URL
-const API_URL = process.env.BACKEND_API_URL || "http://localhost:3000/api";
+const getFileIcon = (file: File) => {
+	const type = file.type.toLowerCase();
+
+	if (type.startsWith("image/")) return <Image className="w-6 h-6" />;
+	if (type.startsWith("video/")) return <Film className="w-6 h-6" />;
+	if (type.startsWith("audio/")) return <Music className="w-6 h-6" />;
+	if (type.startsWith("text/")) return <FileText className="w-6 h-6" />;
+	if (type === "application/pdf") return <FileText className="w-6 h-6" />;
+	if (
+		type.includes("zip") ||
+		type.includes("compressed") ||
+		type.includes("archive")
+	)
+		return <FileArchive className="w-6 h-6" />;
+	if (
+		type.includes("javascript") ||
+		type.includes("typescript") ||
+		type.includes("json")
+	)
+		return <Code className="w-6 h-6" />;
+
+	return <FileIcon className="w-6 h-6" />;
+};
+
+// Helper function to check for duplicate files
+const isDuplicateFile = (file: File, existingFiles: File[]) => {
+	return existingFiles.some(
+		(existingFile) =>
+			existingFile.name === file.name &&
+			existingFile.size === file.size &&
+			existingFile.type === file.type
+	);
+};
 
 export const UploadZone = () => {
 	const [files, setFiles] = useState<File[]>([]);
 	const [uploading, setUploading] = useState(false);
 	const [previewFile, setPreviewFile] = useState<File | null>(null);
-	const [uploadProgress, setUploadProgress] = useState<{
-		[key: string]: number;
-	}>({});
+	const [uploadResult, setUploadResult] = useState<{
+		groupCodes: string[];
+		files: Array<{
+			name: string;
+			size: number;
+			uploadDate: string;
+			expiryDate: string;
+			groupCode: string;
+		}>;
+	} | null>(null);
 
-	const onDrop = useCallback((acceptedFiles: File[]) => {
-		setFiles((prev) => [...prev, ...acceptedFiles]);
-	}, []);
+	const onDrop = useCallback(
+		(acceptedFiles: File[]) => {
+			// Check for duplicates before adding
+			const newFiles = acceptedFiles.filter(
+				(file) => !isDuplicateFile(file, files)
+			);
+
+			// If there are duplicates, show warning
+			if (newFiles.length < acceptedFiles.length) {
+				toast.error("Some files were skipped as they were already selected");
+			}
+
+			setFiles((prev) => [...prev, ...newFiles]);
+		},
+		[files]
+	);
 
 	const { getRootProps, getInputProps, isDragActive } = useDropzone({
 		onDrop,
@@ -38,12 +100,6 @@ export const UploadZone = () => {
 
 	const removeFile = (index: number) => {
 		setFiles((prev) => prev.filter((_, i) => i !== index));
-		// Also remove progress for this file if it exists
-		setUploadProgress((prev) => {
-			const newProgress = { ...prev };
-			delete newProgress[files[index].name];
-			return newProgress;
-		});
 	};
 
 	const canPreview = (file: File) => {
@@ -57,53 +113,71 @@ export const UploadZone = () => {
 		}
 
 		setUploading(true);
+		const uploadResults = [];
+		let sessionGroupCode = null;
 
 		try {
-			const uploadPromises = files.map(async (file) => {
+			// Upload each file individually
+			for (const file of files) {
 				const formData = new FormData();
 				formData.append("file", file);
-
-				try {
-					const config = {
-						headers: {
-							"Content-Type": "multipart/form-data",
-						},
-						onUploadProgress: (progressEvent: {
-							loaded: number;
-							total?: number;
-						}) => {
-							if (progressEvent.total) {
-								const progress = Math.round(
-									(progressEvent.loaded * 100) / progressEvent.total
-								);
-								setUploadProgress((prev) => ({
-									...prev,
-									[file.name]: progress,
-								}));
-							}
-						},
-					} as const;
-
-					const response = await axios.post(
-						`${API_URL}/files/upload`,
-						formData,
-						config
-					);
-
-					return response.data;
-				} catch (error) {
-					console.error(`Error uploading ${file.name}:`, error);
-					throw error;
+				formData.append("username", "anonymous");
+				if (sessionGroupCode) {
+					formData.append("groupCode", sessionGroupCode);
 				}
+
+				console.log("Uploading file:", file.name);
+				const response = await fetch("http://localhost:3000/api/files/upload", {
+					method: "POST",
+					body: formData,
+				});
+
+				if (!response.ok) {
+					const errorData = await response
+						.json()
+						.catch(() => ({ error: "Unknown error" }));
+					throw new Error(errorData.error || `Upload failed for ${file.name}`);
+				}
+
+				const data = await response.json();
+				console.log("Upload response:", data);
+
+				// Store the group code from the first file for subsequent uploads
+				if (!sessionGroupCode) {
+					sessionGroupCode = data.file.groupCode;
+				}
+
+				uploadResults.push({
+					name: data.file.name,
+					filename: data.file.filename,
+					size: data.file.size,
+					uploadDate: data.file.uploadDate,
+					expiryDate: data.file.expiryDate,
+					groupCode: sessionGroupCode,
+				});
+			}
+
+			console.log("All upload results:", uploadResults);
+
+			// Group the results
+			const uniqueFiles = new Map();
+			uploadResults.forEach((result) => {
+				const key = `${result.name}-${result.size}`;
+				uniqueFiles.set(key, result);
 			});
 
-			await Promise.all(uploadPromises);
+			setUploadResult({
+				files: Array.from(uniqueFiles.values()),
+				groupCodes: [sessionGroupCode], // Only show the session group code
+			});
+
 			toast.success("Files uploaded successfully!");
 			setFiles([]);
-			setUploadProgress({});
 		} catch (error) {
 			console.error("Upload error:", error);
-			toast.error("Failed to upload some files");
+			toast.error(
+				error instanceof Error ? error.message : "Failed to upload files"
+			);
 		} finally {
 			setUploading(false);
 		}
@@ -156,6 +230,12 @@ export const UploadZone = () => {
 								}}
 							>
 								<div className="flex items-center flex-1 min-w-0 pr-4">
+									<div
+										className="flex-shrink-0 mr-3"
+										style={{ color: "var(--text-secondary)" }}
+									>
+										{getFileIcon(file)}
+									</div>
 									<div className="flex-1 min-w-0">
 										<p
 											className="text-sm font-medium truncate"
@@ -225,6 +305,78 @@ export const UploadZone = () => {
 						>
 							{uploading ? "Uploading..." : "Upload Files"}
 						</motion.button>
+					</motion.div>
+				)}
+			</AnimatePresence>
+
+			<AnimatePresence>
+				{uploadResult && (
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: -20 }}
+						className="mt-6 p-4 rounded-lg"
+						style={{
+							backgroundColor: "var(--background-card)",
+							borderColor: "var(--border-primary)",
+						}}
+					>
+						<div className="flex items-center justify-between mb-4">
+							<h3
+								className="text-lg font-medium"
+								style={{ color: "var(--text-primary)" }}
+							>
+								Upload Complete!
+							</h3>
+							<code
+								className="px-3 py-1 rounded text-lg"
+								style={{
+									backgroundColor: "var(--background-tertiary)",
+									color: "var(--text-secondary)",
+								}}
+							>
+								{uploadResult.groupCodes.join(", ")}
+							</code>
+						</div>
+						<p
+							className="text-sm mb-4"
+							style={{ color: "var(--text-secondary)" }}
+						>
+							Use these codes to access all uploaded files
+						</p>
+						<div className="space-y-3">
+							{uploadResult.files.map((file, index) => (
+								<div
+									key={index}
+									className="flex flex-col sm:flex-row sm:items-center justify-between py-2 px-3 rounded-lg"
+									style={{
+										backgroundColor: "var(--background-tertiary)",
+									}}
+								>
+									<div className="flex-1 min-w-0">
+										<p
+											className="text-sm font-medium truncate"
+											style={{ color: "var(--text-primary)" }}
+										>
+											{file.name}
+										</p>
+										<p
+											className="text-xs"
+											style={{ color: "var(--text-secondary)" }}
+										>
+											{(file.size / 1024 / 1024).toFixed(2)} MB
+										</p>
+									</div>
+									<div
+										className="text-xs mt-1 sm:mt-0 sm:ml-4"
+										style={{ color: "var(--text-secondary)" }}
+									>
+										<p>Uploaded: {format(new Date(file.uploadDate), "PPp")}</p>
+										<p>Expires: {format(new Date(file.expiryDate), "PPp")}</p>
+									</div>
+								</div>
+							))}
+						</div>
 					</motion.div>
 				)}
 			</AnimatePresence>

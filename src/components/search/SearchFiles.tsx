@@ -230,11 +230,6 @@ export const SearchFiles = () => {
 		return PREVIEWABLE_TYPES.some((type) => file.mimetype.startsWith(type));
 	};
 
-	const renderGroupCodes = (file: FileData, currentCode: string) => {
-		// Remove this function as we don't want to show other group codes
-		return null;
-	};
-
 	return (
 		<div className="w-full max-w-2xl mx-auto p-6">
 			<form onSubmit={handleSearch} className="space-y-6">
@@ -264,8 +259,8 @@ export const SearchFiles = () => {
 					disabled={searching}
 					className="w-full py-3 px-4 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
 					style={{
-						backgroundColor: "var(--button-primary)",
-						color: "var(--text-inverted)",
+						backgroundColor: "var(--button-secondary)",
+						color: "var(--text-primary)",
 					}}
 				>
 					{searching ? "Searching..." : "Search Files"}

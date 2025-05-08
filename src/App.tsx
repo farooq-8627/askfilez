@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { Header } from "./components/layout/Header";
+import { Background } from "./components/layout/Background";
 import { UploadZone } from "./components/upload/UploadZone";
 import { SearchFiles } from "./components/search/SearchFiles";
 import { FileStats } from "./components/stats/FileStats";
@@ -14,6 +15,7 @@ function App() {
 		<ThemeProvider>
 			<Router>
 				<div className="min-h-screen">
+					<Background />
 					<Toaster
 						position="top-right"
 						toastOptions={{

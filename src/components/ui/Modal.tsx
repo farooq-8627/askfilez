@@ -48,14 +48,14 @@ export const Modal = ({ isOpen, onClose, children, title }: ModalProps) => {
 						initial={{ opacity: 0, scale: 0.95 }}
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0, scale: 0.95 }}
-						className="relative w-full max-w-4xl max-h-[90vh] rounded-xl shadow-lg overflow-hidden"
+						className="relative w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-lg overflow-hidden"
 						style={{
 							backgroundColor: "var(--background-card)",
 							borderColor: "var(--border-primary)",
 						}}
 					>
 						<div
-							className="flex items-center justify-between p-4 border-b"
+							className="flex items-center justify-between p-4 border-b rounded-t-2xl"
 							style={{ borderColor: "var(--border-primary)" }}
 						>
 							{title && (
@@ -79,7 +79,7 @@ export const Modal = ({ isOpen, onClose, children, title }: ModalProps) => {
 								/>
 							</button>
 						</div>
-						<div className="p-4 overflow-auto max-h-[calc(90vh-4rem)]">
+						<div className="p-4 overflow-auto max-h-[calc(90vh-4rem)] rounded-b-2xl">
 							{children}
 						</div>
 					</motion.div>

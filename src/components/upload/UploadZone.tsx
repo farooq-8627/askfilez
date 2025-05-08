@@ -321,7 +321,7 @@ export const UploadZone = () => {
 							disabled={uploading}
 							className="w-full py-3 px-4 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
 							style={{
-								backgroundColor: "var(--button-primary)",
+								backgroundColor: "var(--button-secondary)",
 								color: "var(--text-inverted)",
 							}}
 						>

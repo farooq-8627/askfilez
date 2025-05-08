@@ -1,8 +1,8 @@
 export const lightTheme = {
 	background: {
 		primary: "#ffffff",
-		secondary: "#f8fafc",
-		tertiary: "#f1f5f9",
+		secondary: "#EBF8FF",
+		tertiary: "#E3F5FF",
 		card: "#ffffff",
 	},
 	text: {
@@ -16,16 +16,16 @@ export const lightTheme = {
 		secondary: "#cbd5e1",
 	},
 	button: {
-		primary: "#3b82f6",
-		secondary: "#2563eb",
-		tertiary: "#1d4ed8",
-		light: "#bfdbfe",
+		primary: "#4FB3E7",
+		secondary: "#38A3DC",
+		tertiary: "#2B94D1",
+		light: "#EBF8FF",
 	},
 	accent: {
-		primary: "#3b82f6",
-		hover: "#2563eb",
-		pressed: "#1d4ed8",
-		light: "#bfdbfe",
+		primary: "#4FB3E7",
+		hover: "#38A3DC",
+		pressed: "#2B94D1",
+		light: "#EBF8FF",
 	},
 	success: {
 		primary: "#22c55e",
@@ -48,10 +48,10 @@ export const lightTheme = {
 
 export const darkTheme = {
 	background: {
-		primary: "#0f172a",
-		secondary: "#1e293b",
-		tertiary: "#334155",
-		card: "#0f172a",
+		primary: "#0A2540",
+		secondary: "#0E2D4A",
+		tertiary: "#143454",
+		card: "#0A2540",
 	},
 	text: {
 		primary: "#f8fafc",
@@ -60,20 +60,20 @@ export const darkTheme = {
 		inverted: "#0f172a",
 	},
 	border: {
-		primary: "#334155",
-		secondary: "#475569",
+		primary: "#1A3A5F",
+		secondary: "#234567",
 	},
 	button: {
-		primary: "#3b82f6",
-		secondary: "#2563eb",
-		tertiary: "#1d4ed8",
-		light: "#bfdbfe",
+		primary: "#2D7AB8",
+		secondary: "#1E6CA8",
+		tertiary: "#155C96",
+		light: "#0A2540",
 	},
 	accent: {
-		primary: "#3b82f6",
-		hover: "#60a5fa",
-		pressed: "#2563eb",
-		light: "#1e3a8a",
+		primary: "#2D7AB8",
+		hover: "#3D8AC8",
+		pressed: "#1E6CA8",
+		light: "#0A2540",
 	},
 	success: {
 		primary: "#22c55e",

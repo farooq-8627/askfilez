@@ -64,6 +64,11 @@ exports.uploadFile = async (req, res) => {
 					uploadDate: new Date(),
 				});
 
+				// Update expiry date to 21 days from now
+				const newExpiryDate = new Date();
+				newExpiryDate.setDate(newExpiryDate.getDate() + 21);
+				duplicate.expiryDate = newExpiryDate;
+
 				await duplicate.save();
 
 				// Delete the temporary uploaded file
@@ -78,7 +83,7 @@ exports.uploadFile = async (req, res) => {
 						size: duplicate.size,
 						groupCode: newGroupCode,
 						uploadDate: new Date(),
-						expiryDate: duplicate.expiryDate,
+						expiryDate: newExpiryDate,
 						mimetype: duplicate.mimetype,
 						username: trimmedUsername,
 					},

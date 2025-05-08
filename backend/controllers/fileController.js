@@ -26,8 +26,14 @@ exports.uploadFile = async (req, res) => {
 			return res.status(400).json({ error: "No file uploaded" });
 		}
 
+		if (!username || !username.trim()) {
+			return res.status(400).json({ error: "Username is required" });
+		}
+
+		const trimmedUsername = username.trim();
+
 		console.log("Upload request:", {
-			username,
+			username: trimmedUsername,
 			filename: file.originalname,
 			groupCode,
 		});
@@ -49,8 +55,16 @@ exports.uploadFile = async (req, res) => {
 				// File is identical - add new group code if it's not already present
 				if (!duplicate.groupCodes.includes(newGroupCode)) {
 					duplicate.groupCodes.push(newGroupCode);
-					await duplicate.save();
 				}
+
+				// Add new uploader information
+				duplicate.uploaders.push({
+					username: trimmedUsername,
+					groupCode: newGroupCode,
+					uploadDate: new Date(),
+				});
+
+				await duplicate.save();
 
 				// Delete the temporary uploaded file
 				await fsPromises.unlink(file.path);
@@ -63,9 +77,10 @@ exports.uploadFile = async (req, res) => {
 						filename: duplicate.filename,
 						size: duplicate.size,
 						groupCode: newGroupCode,
-						uploadDate: duplicate.uploadDate,
+						uploadDate: new Date(),
 						expiryDate: duplicate.expiryDate,
 						mimetype: duplicate.mimetype,
+						username: trimmedUsername,
 					},
 				});
 			}
@@ -77,7 +92,14 @@ exports.uploadFile = async (req, res) => {
 			originalName: file.originalname,
 			size: file.size,
 			mimetype: file.mimetype,
-			username: username || "anonymous",
+			username: trimmedUsername,
+			uploaders: [
+				{
+					username: trimmedUsername,
+					groupCode: newGroupCode,
+					uploadDate: new Date(),
+				},
+			],
 			filePath: file.path,
 			groupCodes: [newGroupCode],
 			status: "active",
@@ -89,6 +111,7 @@ exports.uploadFile = async (req, res) => {
 			name: newFile.originalName,
 			filename: newFile.filename,
 			groupCodes: newFile.groupCodes,
+			username: trimmedUsername,
 		});
 
 		res.status(201).json({
@@ -102,6 +125,7 @@ exports.uploadFile = async (req, res) => {
 				uploadDate: newFile.uploadDate,
 				expiryDate: newFile.expiryDate,
 				mimetype: newFile.mimetype,
+				username: trimmedUsername,
 			},
 		});
 	} catch (error) {
@@ -146,12 +170,11 @@ exports.getFilesByGroupCode = async (req, res) => {
 
 		// Send files info
 		const response = files.map((file) => {
-			console.log("Processing file:", {
-				id: file._id,
-				name: file.originalName,
-				filename: file.filename,
-				size: file.size,
-			});
+			// Find the uploader for this specific group code
+			const uploader = file.uploaders.find(
+				(u) => u.groupCode === groupCode.toUpperCase()
+			);
+			const uploaderUsername = uploader ? uploader.username : file.username;
 
 			return {
 				id: file._id,
@@ -159,10 +182,11 @@ exports.getFilesByGroupCode = async (req, res) => {
 				filename: file.filename,
 				size: file.size,
 				mimetype: file.mimetype,
-				uploadDate: file.uploadDate,
+				uploadDate: uploader ? uploader.uploadDate : file.uploadDate,
 				expiryDate: file.expiryDate,
 				downloads: file.downloads,
-				groupCodes: file.groupCodes || [groupCode.toUpperCase()], // Fallback for old records
+				groupCodes: [groupCode.toUpperCase()], // Only return the current group code
+				username: uploaderUsername,
 			};
 		});
 
@@ -348,5 +372,131 @@ exports.deleteFile = async (req, res) => {
 		res.json({ message: "File deleted successfully" });
 	} catch (error) {
 		res.status(500).json({ error: error.message });
+	}
+};
+
+exports.streamFile = async (req, res) => {
+	try {
+		const { groupCode, fileId } = req.params;
+		console.log("Stream request received:", { groupCode, fileId });
+
+		const file = await File.findOne({
+			_id: fileId,
+			groupCodes: groupCode.toUpperCase(),
+			status: "active",
+		});
+
+		console.log(
+			"File found in DB:",
+			file
+				? {
+						id: file._id,
+						name: file.originalName,
+						filename: file.filename,
+						filePath: file.filePath,
+						mimetype: file.mimetype,
+				  }
+				: "No file found"
+		);
+
+		if (!file) {
+			return res.status(404).json({ error: "File not found" });
+		}
+
+		// Check expiry
+		if (file.isExpired()) {
+			file.status = "expired";
+			await file.save();
+			return res.status(410).json({ error: "File has expired" });
+		}
+
+		// Construct the file path
+		const uploadDir = path.join(__dirname, "..", "uploads");
+		const absoluteFilePath = path.join(uploadDir, file.filename);
+
+		console.log("File path details:", {
+			uploadDir,
+			filename: file.filename,
+			absoluteFilePath,
+			originalFilePath: file.filePath,
+		});
+
+		try {
+			const exists = await fsPromises
+				.access(absoluteFilePath)
+				.then(() => true)
+				.catch(() => false);
+
+			if (!exists) {
+				console.error("File does not exist at path:", absoluteFilePath);
+				return res.status(404).json({ error: "File not found on server" });
+			}
+			console.log("File exists on disk at:", absoluteFilePath);
+		} catch (error) {
+			console.error("File access error:", error);
+			return res.status(404).json({ error: "File not found on server" });
+		}
+
+		const stat = await fsPromises.stat(absoluteFilePath);
+		console.log("File stats:", {
+			size: stat.size,
+			mime: file.mimetype,
+		});
+
+		// Set CORS headers
+		res.setHeader("Access-Control-Allow-Origin", "*");
+		res.setHeader("Access-Control-Allow-Methods", "GET, HEAD");
+		res.setHeader("Access-Control-Allow-Headers", "Range");
+
+		const range = req.headers.range;
+		if (range) {
+			console.log("Range request received:", range);
+			const parts = range.replace(/bytes=/, "").split("-");
+			const start = parseInt(parts[0], 10);
+			const end = parts[1] ? parseInt(parts[1], 10) : stat.size - 1;
+			const chunksize = end - start + 1;
+
+			console.log("Streaming range:", { start, end, chunksize });
+
+			const stream = fs.createReadStream(absoluteFilePath, { start, end });
+			res.writeHead(206, {
+				"Content-Range": `bytes ${start}-${end}/${stat.size}`,
+				"Accept-Ranges": "bytes",
+				"Content-Length": chunksize,
+				"Content-Type": file.mimetype,
+			});
+
+			stream.on("error", (error) => {
+				console.error("Stream error:", error);
+				if (!res.headersSent) {
+					res.status(500).json({ error: "Error streaming file" });
+				}
+			});
+
+			stream.pipe(res);
+		} else {
+			console.log("Full file request");
+			res.writeHead(200, {
+				"Content-Length": stat.size,
+				"Content-Type": file.mimetype,
+				"Accept-Ranges": "bytes",
+			});
+
+			const stream = fs.createReadStream(absoluteFilePath);
+
+			stream.on("error", (error) => {
+				console.error("Stream error:", error);
+				if (!res.headersSent) {
+					res.status(500).json({ error: "Error streaming file" });
+				}
+			});
+
+			stream.pipe(res);
+		}
+	} catch (error) {
+		console.error("Stream error:", error);
+		if (!res.headersSent) {
+			res.status(500).json({ error: error.message });
+		}
 	}
 };

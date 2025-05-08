@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Search, Download, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
@@ -24,7 +24,117 @@ interface FileData {
 	expiryDate: string;
 	downloads: number;
 	groupCodes: string[];
+	username: string;
 }
+
+const getStreamUrl = (code: string, file: FileData) =>
+	`http://localhost:3000/api/files/stream/${code.trim().toUpperCase()}/${
+		file.id
+	}`;
+
+const FilePreviewContent = ({
+	file,
+	code,
+}: {
+	file: FileData;
+	code: string;
+}) => {
+	const streamUrl = getStreamUrl(code, file);
+	const videoRef = useRef<HTMLVideoElement>(null);
+	const [videoError, setVideoError] = useState<string | null>(null);
+
+	useEffect(() => {
+		setVideoError(null);
+	}, [file]);
+
+	if (file.mimetype.startsWith("image/")) {
+		return (
+			<div className="flex justify-center">
+				<img
+					src={streamUrl}
+					alt={file.name}
+					className="max-w-full max-h-[70vh] object-contain"
+				/>
+			</div>
+		);
+	}
+
+	if (file.mimetype.startsWith("video/")) {
+		return (
+			<div className="flex flex-col items-center">
+				<video
+					ref={videoRef}
+					controls
+					autoPlay
+					playsInline
+					className="max-w-full max-h-[70vh]"
+					style={{ backgroundColor: "black" }}
+					onError={(e) => {
+						console.error("Video error:", e);
+						setVideoError(
+							"Error loading video. Please try downloading instead."
+						);
+					}}
+				>
+					<source src={streamUrl} type={file.mimetype} />
+					Your browser does not support the video tag.
+				</video>
+				{videoError && <p className="text-red-500 mt-2">{videoError}</p>}
+			</div>
+		);
+	}
+
+	if (file.mimetype.startsWith("audio/")) {
+		return (
+			<div className="flex justify-center p-4">
+				<audio controls className="w-full">
+					<source src={streamUrl} type={file.mimetype} />
+					Your browser does not support the audio tag.
+				</audio>
+			</div>
+		);
+	}
+
+	if (file.mimetype === "application/pdf") {
+		return (
+			<div className="w-full h-[70vh]">
+				<object
+					data={streamUrl}
+					type="application/pdf"
+					className="w-full h-full"
+				>
+					<iframe
+						src={`https://docs.google.com/viewer?url=${encodeURIComponent(
+							streamUrl
+						)}&embedded=true`}
+						className="w-full h-full"
+						title={file.name}
+					>
+						This browser does not support PDFs.
+						<a href={streamUrl} target="_blank" rel="noopener noreferrer">
+							Download PDF
+						</a>
+					</iframe>
+				</object>
+			</div>
+		);
+	}
+
+	if (file.mimetype.startsWith("text/")) {
+		return (
+			<iframe src={streamUrl} className="w-full h-[70vh]" title={file.name} />
+		);
+	}
+
+	return (
+		<div className="text-center p-4" style={{ color: "var(--text-primary)" }}>
+			<p>Preview not available for this file type.</p>
+			<p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
+				You can download the file to view it.
+			</p>
+		</div>
+	);
+};
 
 export const SearchFiles = () => {
 	const [code, setCode] = useState("");
@@ -121,18 +231,8 @@ export const SearchFiles = () => {
 	};
 
 	const renderGroupCodes = (file: FileData, currentCode: string) => {
-		if (!file.groupCodes || file.groupCodes.length <= 1) return null;
-
-		const otherCodes = file.groupCodes.filter(
-			(gc) => gc !== currentCode.trim().toUpperCase()
-		);
-		if (otherCodes.length === 0) return null;
-
-		return (
-			<p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
-				Also available with codes: {otherCodes.join(", ")}
-			</p>
-		);
+		// Remove this function as we don't want to show other group codes
+		return null;
 	};
 
 	return (
@@ -211,6 +311,12 @@ export const SearchFiles = () => {
 											className="text-sm"
 											style={{ color: "var(--text-secondary)" }}
 										>
+											Uploaded by: {file.username}
+										</p>
+										<p
+											className="text-sm"
+											style={{ color: "var(--text-secondary)" }}
+										>
 											{(file.size / 1024 / 1024).toFixed(2)} MB
 										</p>
 										<p
@@ -219,7 +325,6 @@ export const SearchFiles = () => {
 										>
 											Expires: {new Date(file.expiryDate).toLocaleDateString()}
 										</p>
-										{renderGroupCodes(file, code)}
 									</div>
 								</div>
 								<div className="flex items-center gap-2">
@@ -265,14 +370,7 @@ export const SearchFiles = () => {
 				}}
 				title="File Preview"
 			>
-				{selectedFile && (
-					<div className="text-center p-4">
-						<p style={{ color: "var(--text-primary)" }}>
-							Preview not available in search mode. Please download the file to
-							view it.
-						</p>
-					</div>
-				)}
+				{selectedFile && <FilePreviewContent file={selectedFile} code={code} />}
 			</Modal>
 		</div>
 	);

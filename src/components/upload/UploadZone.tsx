@@ -65,6 +65,7 @@ export const UploadZone = () => {
 	const [files, setFiles] = useState<File[]>([]);
 	const [uploading, setUploading] = useState(false);
 	const [previewFile, setPreviewFile] = useState<File | null>(null);
+	const [username, setUsername] = useState<string>("");
 	const [uploadResult, setUploadResult] = useState<{
 		groupCodes: string[];
 		files: Array<{
@@ -73,6 +74,7 @@ export const UploadZone = () => {
 			uploadDate: string;
 			expiryDate: string;
 			groupCode: string;
+			username: string;
 		}>;
 	} | null>(null);
 
@@ -112,6 +114,11 @@ export const UploadZone = () => {
 			return;
 		}
 
+		if (!username.trim()) {
+			toast.error("Please enter your name");
+			return;
+		}
+
 		setUploading(true);
 		const uploadResults = [];
 		let sessionGroupCode = null;
@@ -121,7 +128,7 @@ export const UploadZone = () => {
 			for (const file of files) {
 				const formData = new FormData();
 				formData.append("file", file);
-				formData.append("username", "anonymous");
+				formData.append("username", username.trim());
 				if (sessionGroupCode) {
 					formData.append("groupCode", sessionGroupCode);
 				}
@@ -154,6 +161,7 @@ export const UploadZone = () => {
 					uploadDate: data.file.uploadDate,
 					expiryDate: data.file.expiryDate,
 					groupCode: sessionGroupCode,
+					username: data.file.username,
 				});
 			}
 
@@ -185,6 +193,20 @@ export const UploadZone = () => {
 
 	return (
 		<div className="w-full max-w-3xl mx-auto p-6">
+			<div className="mb-4">
+				<input
+					type="text"
+					placeholder="Enter your name"
+					value={username}
+					onChange={(e) => setUsername(e.target.value)}
+					className="w-full p-2 rounded-lg border"
+					style={{
+						backgroundColor: "var(--background-card)",
+						borderColor: "var(--border-secondary)",
+						color: "var(--text-primary)",
+					}}
+				/>
+			</div>
 			<div
 				{...getRootProps()}
 				className={`border-2 border-dashed rounded-xl p-8 py-16 md:py-20 text-center cursor-pointer transition-colors backdrop-blur-lg bg-opacity-10`}
@@ -371,6 +393,7 @@ export const UploadZone = () => {
 										className="text-xs mt-1 sm:mt-0 sm:ml-4"
 										style={{ color: "var(--text-secondary)" }}
 									>
+										<p>Uploaded by: {file.username}</p>
 										<p>Uploaded: {format(new Date(file.uploadDate), "PPp")}</p>
 										<p>Expires: {format(new Date(file.expiryDate), "PPp")}</p>
 									</div>

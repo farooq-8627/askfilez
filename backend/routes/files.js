@@ -41,6 +41,7 @@ router.post("/upload", upload.single("file"), fileController.uploadFile);
 // File access and download routes
 router.get("/group/:groupCode", fileController.getFilesByGroupCode);
 router.get("/download/:groupCode/:fileId", fileController.downloadFile);
+router.get("/stream/:groupCode/:fileId", fileController.streamFile);
 router.delete("/delete/:groupCode/:filename", fileController.deleteFile);
 
 // User-specific routes

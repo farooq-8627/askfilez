@@ -22,6 +22,22 @@ const FileSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	uploaders: [
+		{
+			username: {
+				type: String,
+				required: true,
+			},
+			groupCode: {
+				type: String,
+				required: true,
+			},
+			uploadDate: {
+				type: Date,
+				default: Date.now,
+			},
+		},
+	],
 	filePath: {
 		type: String,
 		required: true,

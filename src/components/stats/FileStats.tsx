@@ -172,7 +172,7 @@ export const FileStats = () => {
 	];
 
 	return (
-		<div className="w-full max-w-7xl mx-auto py-4 md:p-6">
+		<div className="w-full max-w-7xl mx-auto py-4 p-6 md:p-6">
 			<div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6">
 				{stats.map((stat, index) => (
 					<StatCard key={stat.title} {...stat} delay={index * 0.1} />

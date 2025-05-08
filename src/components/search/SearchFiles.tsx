@@ -3,7 +3,6 @@ import { Search, Download, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { Modal } from "../ui/Modal";
-import { FilePreview } from "../upload/FilePreview";
 
 // List of MIME types that can be previewed in the browser
 const PREVIEWABLE_TYPES = [

@@ -7,7 +7,6 @@ import {
 	ChartBar,
 	Menu,
 	X,
-	Home,
 	Upload,
 } from "lucide-react";
 import { useTheme } from "../../theme/ThemeContext";
